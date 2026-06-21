@@ -6,7 +6,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: [
+      'http://localhost:3000',
+      'https://learn-chinese-mgnj3hcgx-learn-chinse.vercel.app',
+      'https://learn-chinese.vercel.app',
+    ],
     credentials: true,
   });
 
