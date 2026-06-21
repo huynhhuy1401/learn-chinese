@@ -4,9 +4,9 @@ import { useParams } from 'next/navigation';
 import { gql, useQuery } from '@apollo/client';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { PronounceButton } from '@/components/pronounce-button';
-import { Loader2, ChevronLeft, MapPin, Volume2, BookOpen, Lightbulb } from 'lucide-react';
+import { StrokeOrder } from '@/components/stroke-order';
+import { Loader2, ChevronLeft, MapPin, Volume2, BookOpen, Lightbulb, Grid3X3 } from 'lucide-react';
 import Link from 'next/link';
 
 const WORD_QUERY = gql`
@@ -83,78 +83,72 @@ export default function WordDetailPage() {
     .slice(0, 6);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link href="/vocabulary" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <Link href="/vocabulary" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
         <ChevronLeft className="w-4 h-4" /> Back to vocabulary
       </Link>
 
-      {/* Main card */}
-      <Card className="p-8 sm:p-10 text-center border-2 border-gray-200 dark:border-gray-700 rounded-3xl mb-6">
-        {/* Province badge */}
-        {word.province && (
-          <Badge variant="outline" className="mb-4 text-sm" style={{ borderColor: word.province.color }}>
-            <MapPin className="w-3.5 h-3.5 mr-1" /> {word.province.name}
-          </Badge>
-        )}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        {/* Left column: Hero + Pronunciation */}
+        <div className="space-y-6">
+          <Card className="p-6 sm:p-8 text-center border-2 border-gray-200 dark:border-gray-700 rounded-3xl">
+            {word.province && (
+              <Badge variant="outline" className="mb-4 text-sm" style={{ borderColor: word.province.color }}>
+                <MapPin className="w-3.5 h-3.5 mr-1" /> {word.province.name}
+              </Badge>
+            )}
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <span className="text-6xl sm:text-7xl font-bold cn-display">{word.character}</span>
+              <PronounceButton text={word.character} size="md" />
+            </div>
+            <p className="text-2xl text-red-600 dark:text-red-400 font-medium mb-1">{word.pinyin}</p>
+            <p className="text-3xl font-bold mb-3">{word.english}</p>
+            <Badge variant="secondary" className="text-sm px-3 py-1">{word.category}</Badge>
+          </Card>
 
-        {/* Character */}
-        <div className="flex items-center justify-center gap-4 mb-4">
-          <span className="text-6xl sm:text-7xl font-bold cn-display">{word.character}</span>
-          <PronounceButton text={word.character} size="md" />
+          <Card className="p-6 border-2 border-gray-200 dark:border-gray-700 rounded-3xl">
+            <h2 className="font-bold text-lg mb-3 flex items-center gap-2">
+              <Volume2 className="w-5 h-5 text-red-600" /> Pronunciation
+            </h2>
+            <div className="flex items-center gap-3 mb-3">
+              <PronounceButton text={word.character} size="md" />
+              <span className="text-lg font-medium">{word.pinyin}</span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Click the speaker to hear the pronunciation.{' '}
+              <Link href="/pinyin" className="text-red-600 hover:underline">Pinyin guide →</Link>
+            </p>
+          </Card>
         </div>
 
-        {/* Pinyin + meaning */}
-        <p className="text-2xl text-red-600 dark:text-red-400 font-medium mb-1">{word.pinyin}</p>
-        <p className="text-3xl font-bold mb-3">{word.english}</p>
-        <Badge variant="secondary" className="text-sm px-3 py-1">{word.category}</Badge>
-      </Card>
+        {/* Right column: Stroke Order */}
+        <Card className="p-6 border-2 border-gray-200 dark:border-gray-700 rounded-3xl">
+          <h2 className="font-bold text-lg mb-3 flex items-center gap-2">
+            <Grid3X3 className="w-5 h-5 text-red-600" /> Stroke Order
+          </h2>
+          <StrokeOrder character={word.character} />
+        </Card>
+      </div>
 
-      {/* Examples */}
+      {/* Usage Examples — full width */}
       <Card className="p-6 border-2 border-gray-200 dark:border-gray-700 rounded-3xl mb-6">
         <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-red-600" /> Usage Examples
         </h2>
-        <div className="space-y-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {examples.map((ex, i) => {
             const parts = ex.split('(');
             const chinese = parts[0]?.trim();
             const english = parts[1]?.replace(')', '')?.trim();
-
             return (
               <div key={i} className="bg-[#e8f0fe] dark:bg-blue-950/20 rounded-xl p-4 border border-blue-100 dark:border-blue-900/30">
-                <div className="flex items-start gap-2">
-                  <span className="text-sm text-muted-foreground shrink-0 mt-1">{i + 1}.</span>
-                  <div>
-                    <p className="text-lg font-medium cn-display">{chinese}</p>
-                    {english && (
-                      <p className="text-sm text-muted-foreground mt-1 italic">{english}</p>
-                    )}
-                  </div>
-                </div>
+                <p className="text-lg font-medium cn-display">{chinese}</p>
+                {english && <p className="text-sm text-muted-foreground mt-1 italic">{english}</p>}
               </div>
             );
           })}
         </div>
-
-        {examples.length === 0 && (
-          <p className="text-muted-foreground text-center py-4">More examples coming soon!</p>
-        )}
-      </Card>
-
-      {/* Pronunciation tips */}
-      <Card className="p-6 border-2 border-gray-200 dark:border-gray-700 rounded-3xl mb-6">
-        <h2 className="font-bold text-lg mb-3 flex items-center gap-2">
-          <Volume2 className="w-5 h-5 text-red-600" /> Pronunciation
-        </h2>
-        <div className="flex items-center gap-3 mb-3">
-          <PronounceButton text={word.character} size="md" />
-          <span className="text-lg font-medium">{word.pinyin}</span>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Click the speaker icon to hear the pronunciation. Listen carefully to the tone —
-          it changes the meaning completely.{' '}
-          <Link href="/pinyin" className="text-red-600 hover:underline">Learn more about tones →</Link>
-        </p>
+        {examples.length === 0 && <p className="text-muted-foreground text-center py-4">More examples coming soon!</p>}
       </Card>
 
       {/* Related words */}
@@ -164,7 +158,7 @@ export default function WordDetailPage() {
             <Lightbulb className="w-5 h-5 text-red-600" /> Related Words
           </h2>
           <p className="text-sm text-muted-foreground mb-3">More words in <strong>{word.category}</strong>:</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
             {related.map((rw: any) => (
               <Link key={rw.id} href={`/vocabulary/${rw.id}`}>
                 <div className="flex items-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-red-200 dark:hover:border-red-800 transition-colors bg-white dark:bg-zinc-900">
