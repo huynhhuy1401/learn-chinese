@@ -22,6 +22,7 @@ import { CoursesModule } from './courses/courses.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
+      cors: { origin: 'https://learn-chinese-cyan.vercel.app', credentials: true },
       context: ({ req, res }: { req: any; res: any }) => ({ req, res }),
     }),
     PrismaModule,
