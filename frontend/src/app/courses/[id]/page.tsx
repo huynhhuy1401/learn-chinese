@@ -64,7 +64,7 @@ export default function CourseDetailPage() {
           const isCompleted = completedIds.has(p.id);
           const isLocked = !isCompleted && i > 0 && !completedIds.has(provinces[i - 1]?.id);
 
-          const prog = progressMap.get(p.id);
+          const prog: any = progressMap.get(p.id);
 
           return (
             <Link key={p.id} href={isLocked ? '#' : `/lessons/${p.id}`} className={isLocked ? 'pointer-events-none' : ''}>
