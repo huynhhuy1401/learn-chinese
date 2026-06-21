@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id // Supabase auth.users id (UUID)
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  progress     UserProgress[]
+  wordProgress UserWordProgress[]
+  savedWords   SavedWord[]
+}
+
+model Course {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String
+  level       String     // "hsk1", "hsk2", etc.
+  imageUrl    String?
+  createdAt   DateTime   @default(now())
+
+  provinces   Province[]
+}
+
+model Province {
+  id                 String   @id @default(uuid())
+  name               String   @unique
+  capital            String
+  culturalDescription String  // Intro paragraph about the province
+  landmark           String   // Famous landmark
+  landmarkFact       String   // Interesting cultural fact
+  food               String   // Famous local dish
+  foodDescription    String   // Description of the dish
+  custom             String   // Local custom or tradition
+  mapCoordinates     String   // JSON: {x, y} for map positioning
+  unlockOrder        Int      @unique
+  color              String   @default("#ef4444") // Province theme color
+  imageUrl           String?  // Unsplash image for lesson card
+  storyContent       String?  // JSON array of story scenes for interactive mode
+  courseId           String?
+
+  course     Course?          @relation(fields: [courseId], references: [id])
+  vocabulary  VocabularyWord[]
+  grammar     GrammarPoint[]
+  exercises   Exercise[]
+  progress    UserProgress[]
+}
+
+model VocabularyWord {
+  id         String  @id @default(uuid())
+  character  String
+  pinyin     String
+  english    String
+  category   String
+  provinceId String
+  travelSentence String? // A sentence using this word in travel context
+
+  province   Province         @relation(fields: [provinceId], references: [id])
+  progress   UserWordProgress[]
+  savedBy    SavedWord[]
+}
+
+model GrammarPoint {
+  id          String  @id @default(uuid())
+  title       String
+  explanation String
+  examples    String  // JSON array of {chinese, pinyin, english} objects
+  provinceId   String
+
+  province Province @relation(fields: [provinceId], references: [id])
+}
+
+model Exercise {
+  id            String @id @default(uuid())
+  type          String // MULTIPLE_CHOICE, FILL_BLANK, CULTURAL
+  question      String
+  questionLabel String?
+  options       String // JSON array
+  correctAnswer String
+  provinceId     String
+
+  province Province @relation(fields: [provinceId], references: [id])
+}
+
+model UserProgress {
+  id             String   @id @default(uuid())
+  userId         String
+  provinceId      String
+  completed      Boolean  @default(false)
+  score          Int      @default(0)
+  exercisesDone  Int      @default(0)
+  lastStudiedAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  province Province @relation(fields: [provinceId], references: [id])
+
+  @@unique([userId, provinceId])
+}
+
+model SavedWord {
+  id        String   @id @default(uuid())
+  userId    String
+  wordId    String
+  createdAt DateTime @default(now())
+
+  user User           @relation(fields: [userId], references: [id])
+  word VocabularyWord @relation(fields: [wordId], references: [id])
+
+  @@unique([userId, wordId])
+}
+
+model UserWordProgress {
+  id             String   @id @default(uuid())
+  userId         String
+  wordId         String
+  masteryLevel   Int      @default(0)
+  timesCorrect   Int      @default(0)
+  timesWrong     Int      @default(0)
+  lastReviewedAt DateTime @default(now())
+  nextReviewAt   DateTime @default(now())
+
+  user User           @relation(fields: [userId], references: [id])
+  word VocabularyWord @relation(fields: [wordId], references: [id])
+
+  @@unique([userId, wordId])
+}
