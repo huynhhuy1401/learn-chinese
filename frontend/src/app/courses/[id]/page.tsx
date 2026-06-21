@@ -105,14 +105,14 @@ export default function CourseDetailPage() {
                     <Badge variant="outline" className="text-xs">{p.capital}</Badge>
                     {isCompleted && <Badge className="text-xs bg-green-500 text-white">Done</Badge>}
                   </div>
-                  {prog && prog.exercisesDone > 0 && (
+                  {(prog?.exercisesDone ?? 0) > 0 ? (
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${(prog.score / prog.exercisesDone) * 100}%` }} />
+                        <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${((prog?.score ?? 0) / (prog?.exercisesDone ?? 1)) * 100}%` }} />
                       </div>
-                      <span className="text-xs text-green-600 font-medium whitespace-nowrap">{prog.score}/{prog.exercisesDone}</span>
+                      <span className="text-xs text-green-600 font-medium whitespace-nowrap">{prog?.score ?? 0}/{prog?.exercisesDone ?? 0}</span>
                     </div>
-                  )}
+                  ) : null}
                   {isLocked && <p className="text-xs text-muted-foreground">🔒 Complete previous lesson</p>}
                   {!prog && !isCompleted && !isLocked && <p className="text-xs text-muted-foreground">Not started</p>}
                 </div>
