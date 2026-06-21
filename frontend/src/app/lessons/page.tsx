@@ -88,7 +88,7 @@ export default function LessonsPage() {
               !completedIds.has(
                 provinces.find((p: any) => p.unlockOrder === province.unlockOrder - 1)?.id ?? '',
               );
-            const p = progressMap.get(province.id);
+            const p: any = progressMap.get(province.id);
 
             return (
               <Link
