@@ -1,0 +1,100 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Exercise {
+  correctAnswer: String!
+  id: ID!
+  options: String!
+  question: String!
+  questionLabel: String
+  type: String!
+}
+
+type ExerciseResult {
+  correct: Boolean!
+  correctAnswer: String!
+}
+
+type GrammarPoint {
+  examples: String!
+  explanation: String!
+  id: ID!
+  title: String!
+}
+
+type Lesson {
+  _count: LessonCount
+  description: String!
+  exercises: [Exercise!]
+  grammar: [GrammarPoint!]
+  id: ID!
+  order: Int!
+  title: String!
+  vocabulary: [VocabularyWord!]
+  weekNumber: Int!
+}
+
+type LessonCount {
+  exercises: Int!
+  vocabulary: Int!
+}
+
+type Mutation {
+  completeLesson(lessonId: ID!): UserProgress!
+  reviewWord(correct: Boolean!, wordId: ID!): UserWordProgress!
+  submitAnswer(answer: String!, exerciseId: String!, lessonId: ID!): ExerciseResult!
+}
+
+type Query {
+  exercises(lessonId: ID!): [Exercise!]!
+  grammar(lessonId: ID): [GrammarPoint!]!
+  lesson(id: ID!): Lesson
+  lessons: [Lesson!]!
+  me: User!
+  userProgress: [UserProgress!]!
+  vocabulary(lessonId: ID): [VocabularyWord!]!
+  wordProgress: [UserWordProgress!]!
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  name: String!
+}
+
+type UserProgress {
+  completed: Boolean!
+  exercisesDone: Int!
+  id: ID!
+  lastStudiedAt: DateTime!
+  lessonId: String!
+  score: Int!
+  userId: String!
+}
+
+type UserWordProgress {
+  id: ID!
+  lastReviewedAt: DateTime!
+  masteryLevel: Int!
+  nextReviewAt: DateTime!
+  timesCorrect: Int!
+  timesWrong: Int!
+  userId: String!
+  wordId: String!
+}
+
+type VocabularyWord {
+  category: String!
+  character: String!
+  english: String!
+  id: ID!
+  masteryLevel: Float
+  pinyin: String!
+}
