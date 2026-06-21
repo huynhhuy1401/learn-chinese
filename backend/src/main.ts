@@ -8,8 +8,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000',
-      'https://learn-chinese-mgnj3hcgx-learn-chinse.vercel.app',
-      'https://learn-chinese.vercel.app',
+      /\.vercel\.app$/,
     ],
     credentials: true,
   });
