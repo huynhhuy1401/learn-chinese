@@ -2,9 +2,9 @@ import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { supabase } from './supabase';
 
-const GRAPHQL_URL = 'http://localhost:4000/graphql';
-
-const httpLink = new HttpLink({ uri: GRAPHQL_URL });
+const httpLink = new HttpLink({
+  uri: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/graphql',
+});
 
 const authLink = setContext(async (_, { headers }) => {
   const { data } = await supabase.auth.getSession();
