@@ -16,6 +16,7 @@ import { StoryPlayer } from '@/components/story-player';
 import {
   Loader2, ChevronRight, ChevronLeft, BookOpen, Languages, PenTool,
   Trophy, Sparkles, CheckCircle2, ArrowRight, Library, ScrollText,
+  Building2, ChefHat, Compass,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -244,59 +245,83 @@ export default function LessonDetailPage() {
           <div className="grid sm:grid-cols-3 gap-4">
             {/* Vocabulary card */}
             <Card
-              className={`p-5 text-center cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 border-2 rounded-2xl ${
-                vocabDone ? 'border-green-300 bg-green-50/50 dark:bg-green-950/10' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-900 hover:border-red-200'
+              className={`p-5 text-center cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 border rounded-2xl ${
+                vocabDone ? 'border-green-500/20 bg-green-500/[0.03]' : 'border-border bg-card/65 hover:border-primary/20 shadow-sm'
               }`}
               onClick={() => setView('vocab')}
             >
-              <div className="text-4xl mb-3">{vocabDone ? '✅' : '📖'}</div>
+              {vocabDone ? (
+                <div className="w-12 h-12 rounded-2xl bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-6 h-6 animate-pulse" />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-primary flex items-center justify-center mx-auto mb-3 shadow-inner">
+                  <Library className="w-5 h-5" />
+                </div>
+              )}
               <h3 className="font-bold text-lg mb-1">Vocabulary</h3>
-              <p className="text-sm text-muted-foreground mb-2">
+              <p className="text-sm text-muted-foreground mb-2 font-light">
                 {studiedWordIds.size > 0
-                  ? `${studiedWordIds.size}/${lesson.vocabulary?.length ?? 0} words studied`
-                  : `${lesson.vocabulary?.length ?? 0} words to learn`}
+                  ? `${studiedWordIds.size}/${lesson.vocabulary?.length ?? 0} studied`
+                  : `${lesson.vocabulary?.length ?? 0} words`}
               </p>
               {studiedWordIds.size > 0 && (
                 <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mb-3">
                   <div className="h-full bg-red-500 rounded-full transition-all" style={{ width: `${(studiedWordIds.size / (lesson.vocabulary?.length ?? 1)) * 100}%` }} />
                 </div>
               )}
-              <Button variant={vocabDone ? 'outline' : 'default'} size="sm" className="rounded-xl">
+              <Button variant={vocabDone ? 'outline' : 'default'} size="sm" className="rounded-xl font-semibold">
                 {vocabDone ? 'Review' : studiedWordIds.size > 0 ? 'Continue' : 'Study'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Card>
 
             {/* Grammar card */}
             <Card
-              className={`p-5 text-center cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 border-2 rounded-2xl ${
-                grammarDone ? 'border-green-300 bg-green-50/50 dark:bg-green-950/10' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-900 hover:border-red-200'
+              className={`p-5 text-center cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 border rounded-2xl ${
+                grammarDone ? 'border-green-500/20 bg-green-500/[0.03]' : 'border-border bg-card/65 hover:border-primary/20 shadow-sm'
               }`}
               onClick={() => setView('grammar')}
             >
-              <div className="text-4xl mb-3">{grammarDone ? '✅' : '📐'}</div>
+              {grammarDone ? (
+                <div className="w-12 h-12 rounded-2xl bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-6 h-6 animate-pulse" />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                  <Languages className="w-5 h-5" />
+                </div>
+              )}
               <h3 className="font-bold text-lg mb-1">Grammar</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                {lesson.grammar?.length ?? 0} grammar points
+              <p className="text-sm text-muted-foreground mb-3 font-light">
+                {lesson.grammar?.length ?? 0} points
               </p>
-              <Button variant={grammarDone ? 'outline' : 'default'} size="sm" className="rounded-xl">
+              <Button variant={grammarDone ? 'outline' : 'default'} size="sm" className="rounded-xl font-semibold">
                 {grammarDone ? 'Review' : 'Learn'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Card>
 
             {/* Practice card */}
             <Card
-              className={`p-5 text-center cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 border-2 rounded-2xl ${
-                practiceDone ? 'border-green-300 bg-green-50/50 dark:bg-green-950/10' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-900 hover:border-red-200'
+              className={`p-5 text-center cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 border rounded-2xl ${
+                practiceDone ? 'border-green-500/20 bg-green-500/[0.03]' : 'border-border bg-card/65 hover:border-primary/20 shadow-sm'
               }`}
               onClick={() => setView('practice')}
             >
-              <div className="text-4xl mb-3">{practiceDone ? '✅' : '✏️'}</div>
+              {practiceDone ? (
+                <div className="w-12 h-12 rounded-2xl bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-6 h-6 animate-pulse" />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                  <PenTool className="w-5 h-5" />
+                </div>
+              )}
               <h3 className="font-bold text-lg mb-1">Practice</h3>
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-sm text-muted-foreground mb-3 font-light">
                 {exercises.length} questions
                 {practiceDone && ` · Score: ${practiceScore}/${practiceTotal}`}
               </p>
-              <Button variant={practiceDone ? 'outline' : 'default'} size="sm" className="rounded-xl">
+              <Button variant={practiceDone ? 'outline' : 'default'} size="sm" className="rounded-xl font-semibold">
                 {practiceDone ? 'Retry' : 'Start'} <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Card>
@@ -304,17 +329,17 @@ export default function LessonDetailPage() {
 
           {/* Cultural preview */}
           <div className="grid grid-cols-3 gap-3 mt-4">
-            <div className="text-center p-3 rounded-xl bg-red-50/50 dark:bg-red-950/10 border border-red-100 dark:border-red-900/20">
-              <p className="text-2xl mb-1">🏛️</p>
-              <p className="text-xs font-medium">{lesson.landmark}</p>
+            <div className="text-center p-3.5 rounded-2xl bg-red-500/5 dark:bg-red-500/[0.02] border border-red-500/10 flex flex-col justify-center items-center">
+              <Building2 className="w-5 h-5 text-primary mb-1.5" />
+              <p className="text-[11px] font-semibold text-foreground tracking-tight line-clamp-1">{lesson.landmark}</p>
             </div>
-            <div className="text-center p-3 rounded-xl bg-orange-50/50 dark:bg-orange-950/10 border border-orange-100 dark:border-orange-900/20">
-              <p className="text-2xl mb-1">🍜</p>
-              <p className="text-xs font-medium">{lesson.food}</p>
+            <div className="text-center p-3.5 rounded-2xl bg-orange-500/5 dark:bg-orange-500/[0.02] border border-orange-500/10 flex flex-col justify-center items-center">
+              <ChefHat className="w-5 h-5 text-orange-600 mb-1.5" />
+              <p className="text-[11px] font-semibold text-foreground tracking-tight line-clamp-1">{lesson.food}</p>
             </div>
-            <div className="text-center p-3 rounded-xl bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100 dark:border-blue-900/20">
-              <p className="text-2xl mb-1">🎭</p>
-              <p className="text-xs font-medium">Local Custom</p>
+            <div className="text-center p-3.5 rounded-2xl bg-blue-500/5 dark:bg-blue-500/[0.02] border border-blue-500/10 flex flex-col justify-center items-center">
+              <ScrollText className="w-5 h-5 text-blue-600 mb-1.5" />
+              <p className="text-[11px] font-semibold text-foreground tracking-tight line-clamp-1">Local Custom</p>
             </div>
           </div>
 
@@ -446,19 +471,42 @@ export default function LessonDetailPage() {
 
       {/* ======== CULTURAL REWARD ======== */}
       {view === 'culture' && (
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-center mb-2">🏛️ Cultural Discovery</h2>
-          <p className="text-center text-muted-foreground mb-6">Your reward for exploring {lesson.name}.</p>
-          <Card className="p-6 sm:p-8 bg-gradient-to-br from-red-50 to-amber-50 dark:from-red-950/10 dark:to-amber-950/10 border-2 border-red-200 dark:border-red-900/30">
-            <div className="text-center mb-6"><span className="text-5xl">🗺️</span><h3 className="text-2xl font-bold mt-3">{lesson.landmark}</h3><p className="text-base text-muted-foreground mt-2 leading-relaxed max-w-lg mx-auto">{lesson.landmarkFact}</p></div>
+        <div className="space-y-6 animate-fade-in">
+          <div className="text-center mb-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-3">
+              <Compass className="w-6 h-6 animate-spin" style={{ animationDuration: '6s' }} />
+            </div>
+            <h2 className="text-3xl font-extrabold text-center mb-2">Cultural Discovery</h2>
+            <p className="text-center text-muted-foreground font-light text-sm">Your rewards for exploring {lesson.name}.</p>
+          </div>
+          <Card className="p-6 sm:p-8 bg-card/85 backdrop-blur-sm border rounded-3xl shadow-lg shadow-red-950/[0.02]">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-primary flex items-center justify-center mx-auto mb-3 shadow-inner">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-2xl font-bold mt-3">{lesson.landmark}</h3>
+              <p className="text-base text-muted-foreground mt-2 leading-relaxed max-w-lg mx-auto font-light">{lesson.landmarkFact}</p>
+            </div>
             <Separator className="my-6" />
-            <div className="text-center mb-6"><span className="text-5xl">🍜</span><h3 className="text-2xl font-bold mt-3">{lesson.food}</h3><p className="text-base text-muted-foreground mt-2 leading-relaxed max-w-lg mx-auto">{lesson.foodDescription}</p></div>
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                <ChefHat className="w-6 h-6" />
+              </div>
+              <h3 className="text-2xl font-bold mt-3">{lesson.food}</h3>
+              <p className="text-base text-muted-foreground mt-2 leading-relaxed max-w-lg mx-auto font-light">{lesson.foodDescription}</p>
+            </div>
             <Separator className="my-6" />
-            <div className="text-center"><span className="text-5xl">🎭</span><h3 className="text-2xl font-bold mt-3">Local Custom</h3><p className="text-base text-muted-foreground mt-2 leading-relaxed max-w-lg mx-auto">{lesson.custom}</p></div>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                <ScrollText className="w-6 h-6" />
+              </div>
+              <h3 className="text-2xl font-bold mt-3">Local Custom</h3>
+              <p className="text-base text-muted-foreground mt-2 leading-relaxed max-w-lg mx-auto font-light">{lesson.custom}</p>
+            </div>
           </Card>
           <div className="flex justify-center gap-3">
-            <Button variant="outline" size="lg" onClick={() => setView('hub')}>Back to lesson</Button>
-            <Button size="lg" onClick={handleCompleteLesson}>Complete Lesson 🎉 <Trophy className="w-5 h-5 ml-2" /></Button>
+            <Button variant="outline" size="lg" onClick={() => setView('hub')} className="rounded-2xl">Back to lesson</Button>
+            <Button size="lg" onClick={handleCompleteLesson} className="rounded-2xl btn-premium bg-primary text-primary-foreground">Complete Lesson 🎉 <Trophy className="w-5 h-5 ml-2" /></Button>
           </div>
         </div>
       )}
