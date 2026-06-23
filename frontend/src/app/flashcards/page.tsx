@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PronounceButton } from '@/components/pronounce-button';
-import { Loader2, Bookmark, CheckCircle2, RotateCcw, Eye, ArrowRight, Shuffle } from 'lucide-react';
+import { Loader2, Bookmark, CheckCircle2, RotateCcw, Eye, ArrowRight, Shuffle, Trophy, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 
@@ -81,7 +81,7 @@ export default function FlashcardsPage() {
         <Bookmark className="w-16 h-16 mx-auto text-muted-foreground mb-4 opacity-40" />
         <h1 className="text-2xl font-bold mb-2">No Flashcards Yet</h1>
         <p className="text-muted-foreground mb-6">
-          Save words as you learn and review them here. Look for the 🔖 icon on word cards!
+          Save words as you learn and review them here. Look for the bookmark icon on word cards!
         </p>
         <Link href="/vocabulary">
           <Button size="lg" className="rounded-2xl">Browse Vocabulary</Button>
@@ -94,7 +94,15 @@ export default function FlashcardsPage() {
     return (
       <div className="max-w-xl mx-auto px-4 py-12 text-center">
         <Card className="p-8 rounded-3xl border-2 border-gray-200 dark:border-gray-700">
-          <p className="text-5xl mb-4">{correctCount === shuffled.length ? '🎉' : '📊'}</p>
+          <div className="flex justify-center mb-6">
+            <div className={`p-4 rounded-full ${correctCount === shuffled.length ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400' : 'bg-primary/10 text-primary'} animate-bounce`}>
+              {correctCount === shuffled.length ? (
+                <Trophy className="w-12 h-12" />
+              ) : (
+                <BarChart3 className="w-12 h-12" />
+              )}
+            </div>
+          </div>
           <h1 className="text-2xl font-bold mb-2">Review Complete!</h1>
           <p className="text-muted-foreground mb-6">
             {correctCount}/{shuffled.length} correct
@@ -117,7 +125,9 @@ export default function FlashcardsPage() {
   return (
     <div className="max-w-xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold">🔖 Flashcards</h1>
+        <h1 className="text-xl font-bold flex items-center gap-2">
+          <Bookmark className="w-5 h-5 text-primary" /> Flashcards
+        </h1>
         <span className="text-sm text-muted-foreground">
           {currentIdx + 1}/{shuffled.length} · {correctCount} correct
         </span>

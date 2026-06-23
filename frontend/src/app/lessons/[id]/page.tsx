@@ -104,7 +104,7 @@ export default function LessonDetailPage() {
   const handleCompleteLesson = useCallback(async () => {
     try { await completeProvince({ variables: { provinceId: id } }); } catch {}
     setView('done');
-    toast.success('Lesson completed! 🎉');
+    toast.success('Lesson completed!');
   }, [completeProvince, id]);
 
   // ====== RENDER: loading / not found ======
@@ -228,7 +228,9 @@ export default function LessonDetailPage() {
               onClick={() => setView('story')}
             >
               <div className="flex items-center gap-4 p-5">
-                <div className="text-5xl shrink-0">📖</div>
+                <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-600 flex items-center justify-center shrink-0 shadow-inner">
+                  <BookOpen className="w-6 h-6" />
+                </div>
                 <div className="flex-1">
                   <Badge className="mb-1 bg-red-500 text-white">Story Mode</Badge>
                   <h3 className="text-lg font-bold mb-1">Lily&apos;s Journey</h3>
@@ -371,7 +373,9 @@ export default function LessonDetailPage() {
       {/* ======== VOCAB REFERENCE ======== */}
       {view === 'vocab-ref' && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold mb-2">📖 Word List</h2>
+          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+            <BookOpen className="w-6 h-6 text-primary" /> Word List
+          </h2>
           <p className="text-muted-foreground mb-4">All words from this lesson for quick reference.</p>
           <div className="grid sm:grid-cols-2 gap-2">
             {(lesson.vocabulary ?? []).map((word: any) => (
@@ -506,7 +510,7 @@ export default function LessonDetailPage() {
           </Card>
           <div className="flex justify-center gap-3">
             <Button variant="outline" size="lg" onClick={() => setView('hub')} className="rounded-2xl">Back to lesson</Button>
-            <Button size="lg" onClick={handleCompleteLesson} className="rounded-2xl btn-premium bg-primary text-primary-foreground">Complete Lesson 🎉 <Trophy className="w-5 h-5 ml-2" /></Button>
+            <Button size="lg" onClick={handleCompleteLesson} className="rounded-2xl btn-premium bg-primary text-primary-foreground">Complete Lesson <Trophy className="w-5 h-5 ml-2" /></Button>
           </div>
         </div>
       )}
@@ -516,7 +520,7 @@ export default function LessonDetailPage() {
         <div className="space-y-6">
           <Card className="p-8 text-center bg-gradient-to-br from-red-50 via-amber-50 to-red-50 dark:from-red-950/10 dark:via-amber-950/10 dark:to-red-950/10 border-2 border-red-200 dark:border-red-900/30">
             <Trophy className="w-16 h-16 mx-auto text-amber-500 mb-4" />
-            <h1 className="text-3xl font-bold mb-2">Lesson Complete! 🎉</h1>
+            <h1 className="text-3xl font-bold mb-2">Lesson Complete!</h1>
             <p className="text-lg text-muted-foreground mb-6">You&apos;ve explored {lesson.name} and mastered new skills!</p>
             <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8">
               <div className="bg-white/60 dark:bg-zinc-800/60 rounded-xl p-3"><p className="text-2xl font-bold text-red-600">{lesson.vocabulary?.length ?? 0}</p><p className="text-xs text-muted-foreground">Words</p></div>
@@ -528,7 +532,10 @@ export default function LessonDetailPage() {
               {nextProvince && (<Link href={`/lessons/${nextProvince.id}`}><Button size="lg">Next: {nextProvince.name} <ChevronRight className="w-4 h-4 ml-1" /></Button></Link>)}
             </div>
           </Card>
-          <Card className="p-6"><h3 className="font-semibold text-lg mb-4">📖 Quick Review</h3>
+          <Card className="p-6">
+            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-primary" /> Quick Review
+            </h3>
             <div className="grid sm:grid-cols-2 gap-2">
               {lesson.vocabulary?.slice(0, 8).map((w: any) => (<div key={w.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30"><PronounceButton text={w.character} /><span className="text-lg font-bold cn-display">{w.character}</span><span className="text-sm text-muted-foreground ml-auto">{w.english}</span></div>))}
             </div>

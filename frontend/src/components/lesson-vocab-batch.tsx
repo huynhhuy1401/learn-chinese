@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PronounceButton } from '@/components/pronounce-button';
-import { CheckCircle2, RotateCcw, Eye, ArrowRight } from 'lucide-react';
+import { CheckCircle2, RotateCcw, Eye, ArrowRight, Trophy, BarChart3 } from 'lucide-react';
 
 interface VocabWord {
   id: string;
@@ -69,7 +69,15 @@ export function VocabBatch({ words, batchIndex, totalBatches, onComplete, onRevi
     return (
       <div className="max-w-xl mx-auto">
         <div className="rounded-3xl border bg-card/85 backdrop-blur-sm p-8 sm:p-10 text-center shadow-lg shadow-red-950/[0.01] animate-fade-in">
-          <p className="text-5xl mb-4">{gotCount === words.length ? '🎉' : '📊'}</p>
+          <div className="flex justify-center mb-6">
+            <div className={`p-4 rounded-full ${gotCount === words.length ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400' : 'bg-primary/10 text-primary'} animate-bounce`}>
+              {gotCount === words.length ? (
+                <Trophy className="w-12 h-12" />
+              ) : (
+                <BarChart3 className="w-12 h-12" />
+              )}
+            </div>
+          </div>
           <h3 className="text-2xl font-bold mb-2">
             {gotCount}/{words.length} words learned
           </h3>

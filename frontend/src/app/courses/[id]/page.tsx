@@ -113,7 +113,11 @@ export default function CourseDetailPage() {
                       <span className="text-xs text-green-600 font-medium whitespace-nowrap">{prog?.score ?? 0}/{prog?.exercisesDone ?? 0}</span>
                     </div>
                   ) : null}
-                  {isLocked && <p className="text-xs text-muted-foreground">🔒 Complete previous lesson</p>}
+                  {isLocked && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" /> Complete previous lesson
+                    </p>
+                  )}
                   {!prog && !isCompleted && !isLocked && <p className="text-xs text-muted-foreground">Not started</p>}
                 </div>
               </Card>

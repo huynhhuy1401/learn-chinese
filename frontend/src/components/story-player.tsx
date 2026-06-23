@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PronounceButton } from '@/components/pronounce-button';
-import { ChevronRight, ArrowRight, MessageCircle, BookOpen, CheckCircle2, XCircle, Sparkles, BookHeart, PenTool } from 'lucide-react';
+import { ChevronRight, ArrowRight, MessageCircle, BookOpen, CheckCircle2, XCircle, Sparkles, BookHeart, PenTool, Frown, Smile, Brain, Coffee, Heart, MapPin } from 'lucide-react';
 
 interface StoryScene {
   type: 'intro' | 'scene' | 'learn' | 'quiz' | 'end';
@@ -61,14 +61,14 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
     setQuizAnswered(true);
   };
 
-  const moods: Record<string, string> = {
-    nervous: '😰',
-    helpful: '😊',
-    hopeful: '🌟',
-    focused: '🤔',
-    warm: '☕',
-    grateful: '🥹',
-    reflective: '📝',
+  const moodIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+    nervous: Frown,
+    helpful: Smile,
+    hopeful: Sparkles,
+    focused: Brain,
+    warm: Coffee,
+    grateful: Heart,
+    reflective: PenTool,
   };
 
   const renderDialogue = (dialogueText: string) => {
@@ -126,7 +126,12 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
             )}
             <div className="p-6 sm:p-8">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">{moods[scene.mood] || '📍'}</span>
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                  {(() => {
+                    const Icon = moodIcons[scene.mood] || MapPin;
+                    return <Icon className="w-4.5 h-4.5" />;
+                  })()}
+                </div>
                 <Badge variant="secondary" className="capitalize">{scene.speaker}</Badge>
               </div>
               <h2 className="text-xl font-bold mb-4">{scene.title}</h2>
@@ -149,7 +154,12 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
           <div className="space-y-4">
             <Card className="rounded-3xl border bg-card/70 backdrop-blur-md shadow-lg shadow-red-950/[0.02] p-6 sm:p-8">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">{moods[scene.mood] || '📖'}</span>
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                  {(() => {
+                    const Icon = moodIcons[scene.mood] || BookOpen;
+                    return <Icon className="w-4.5 h-4.5" />;
+                  })()}
+                </div>
                 <Badge variant="secondary" className="capitalize">{scene.speaker}</Badge>
               </div>
               <h2 className="text-xl font-bold mb-3">{scene.title}</h2>
@@ -225,7 +235,7 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
                 }`}>
                   {quizCorrect ? <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" /> : <XCircle className="w-6 h-6 text-red-500 shrink-0" />}
                   <div>
-                    <p className="font-bold text-base">{quizCorrect ? 'Correct! 🎉' : 'Not quite'}</p>
+                    <p className="font-bold text-base">{quizCorrect ? 'Correct!' : 'Not quite'}</p>
                     <p className="text-sm font-medium mt-0.5 cn-display">{scene.answer}</p>
                   </div>
                 </div>

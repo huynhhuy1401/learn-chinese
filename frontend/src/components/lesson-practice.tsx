@@ -113,7 +113,7 @@ export function LessonPractice({ exercises, onComplete, onSubmitAnswer }: Lesson
               )}
               <div>
                 <p className="font-bold text-base">
-                  {answered.correct ? 'Correct! 🎉' : 'Not quite'}
+                  {answered.correct ? 'Correct!' : 'Not quite'}
                 </p>
                 <p className="text-sm mt-0.5 opacity-90 font-medium">
                   Correct: <strong className="cn-display">{answered.correctAnswer}</strong>

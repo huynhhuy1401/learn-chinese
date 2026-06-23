@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PronounceButton } from '@/components/pronounce-button';
 import Link from 'next/link';
+import { Volume2, MessageSquare, Scale, Target } from 'lucide-react';
 
 const tones = [
   {
@@ -202,7 +203,7 @@ export default function PinyinGuidePage() {
       <section className="mb-12">
         <h2 className="text-2xl font-bold mb-4">Initials (Consonants)</h2>
         <p className="text-muted-foreground mb-4">
-          The beginning sound of a syllable. Click 🔊 to hear each one. Pay attention to j/q/x and zh/ch/sh — they have no English equivalent.
+          The beginning sound of a syllable. Click the speaker icon to hear each one. Pay attention to j/q/x and zh/ch/sh — they have no English equivalent.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {pinyinInitials.map((init) => (
@@ -229,7 +230,7 @@ export default function PinyinGuidePage() {
       <section className="mb-12">
         <h2 className="text-2xl font-bold mb-4">Finals (Vowels & Endings)</h2>
         <p className="text-muted-foreground mb-4">
-          The ending part of a syllable. Click 🔊 to hear the example word spoken.
+          The ending part of a syllable. Click the speaker icon to hear the example word spoken.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {finals.map((f) => (
@@ -257,14 +258,18 @@ export default function PinyinGuidePage() {
         <h2 className="text-2xl font-bold mb-4">Quick Tips</h2>
         <Card className="p-5 space-y-3">
           <div>
-            <h3 className="font-semibold">🗣️ Tone changes (sandhi)</h3>
+            <h3 className="font-semibold flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-red-500" /> Tone changes (sandhi)
+            </h3>
             <p className="text-sm text-muted-foreground">
               When two 3rd tones appear together, the first one becomes 2nd tone. Example: 你好
               (nǐ hǎo → ní hǎo).
             </p>
           </div>
           <div>
-            <h3 className="font-semibold">📏 Tone mark placement</h3>
+            <h3 className="font-semibold flex items-center gap-2">
+              <Scale className="w-5 h-5 text-red-500" /> Tone mark placement
+            </h3>
             <p className="text-sm text-muted-foreground">
               The tone mark goes on the main vowel. Rule: &ldquo;a, o, e&rdquo; takes priority, then
               &ldquo;i, u, ü&rdquo;. If &ldquo;i&rdquo; and &ldquo;u&rdquo; are together, the tone
@@ -272,7 +277,9 @@ export default function PinyinGuidePage() {
             </p>
           </div>
           <div>
-            <h3 className="font-semibold">🎯 Practice daily</h3>
+            <h3 className="font-semibold flex items-center gap-2">
+              <Target className="w-5 h-5 text-red-500" /> Practice daily
+            </h3>
             <p className="text-sm text-muted-foreground">
               Listen to the audio for every vocabulary word as you learn. Imitate native speakers.
               Record yourself and compare!
