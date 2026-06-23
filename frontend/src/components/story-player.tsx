@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PronounceButton } from '@/components/pronounce-button';
-import { ChevronRight, ArrowRight, MessageCircle, BookOpen, CheckCircle2, XCircle, Sparkles, BookHeart } from 'lucide-react';
+import { ChevronRight, ArrowRight, MessageCircle, BookOpen, CheckCircle2, XCircle, Sparkles, BookHeart, PenTool } from 'lucide-react';
 
 interface StoryScene {
   type: 'intro' | 'scene' | 'learn' | 'quiz' | 'end';
@@ -192,9 +192,11 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
         {/* QUIZ */}
         {scene.type === 'quiz' && (
           <Card className="rounded-3xl border bg-card/70 backdrop-blur-md shadow-lg shadow-red-950/[0.02] p-6 sm:p-8">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">✏️</span>
-              <Badge variant="secondary">Quiz</Badge>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                <PenTool className="w-4 h-4" />
+              </div>
+              <Badge variant="secondary" className="font-bold text-xs">Quiz</Badge>
             </div>
             <h2 className="text-xl font-bold mb-3">{scene.title}</h2>
             <p className="text-muted-foreground leading-relaxed mb-4 font-light">{scene.narrative}</p>

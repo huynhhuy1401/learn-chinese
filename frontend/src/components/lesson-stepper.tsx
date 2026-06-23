@@ -1,9 +1,9 @@
 'use client';
 
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Compass, Library, Languages, PenTool, Building2, Trophy } from 'lucide-react';
 
 const stepLabels = ['Welcome', 'Vocabulary', 'Grammar', 'Practice', 'Culture', 'Done'];
-const stepIcons = ['👋', '📖', '📐', '✏️', '🏛️', '🎉'];
+const stepIcons = [Compass, Library, Languages, PenTool, Building2, Trophy];
 
 interface LessonStepperProps {
   currentStep: number;
@@ -38,7 +38,14 @@ export function LessonStepper({ currentStep, completedSteps, onStepClick }: Less
                       : 'bg-muted text-muted-foreground'
                 }`}
               >
-                {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : stepIcons[i]}
+                {isCompleted ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : (
+                  (() => {
+                    const Icon = stepIcons[i];
+                    return <Icon className="w-4 h-4" />;
+                  })()
+                )}
               </div>
               <span
                 className={`text-[10px] sm:text-[11px] font-semibold hidden sm:block transition-all duration-300 ${

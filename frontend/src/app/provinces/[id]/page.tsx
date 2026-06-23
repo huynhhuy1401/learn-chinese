@@ -115,12 +115,11 @@ export default function ProvinceDetailPage() {
         </Card>
       </div>
 
-      {/* Learning Tabs */}
       <Tabs defaultValue="vocabulary">
         <TabsList className="mb-6">
-          <TabsTrigger value="vocabulary">📖 Vocabulary</TabsTrigger>
-          <TabsTrigger value="grammar">📐 Grammar</TabsTrigger>
-          <TabsTrigger value="exercises">✏️ Exercises</TabsTrigger>
+          <TabsTrigger value="vocabulary">Vocabulary</TabsTrigger>
+          <TabsTrigger value="grammar">Grammar</TabsTrigger>
+          <TabsTrigger value="exercises">Exercises</TabsTrigger>
         </TabsList>
 
         <TabsContent value="vocabulary">
