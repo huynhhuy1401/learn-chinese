@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Play, Pause, RotateCcw, SkipForward } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 interface StrokeOrderProps {
   character: string;
@@ -16,11 +17,17 @@ export function StrokeOrder({ character }: StrokeOrderProps) {
   const [playing, setPlaying] = useState(false);
   const [strokeCount, setStrokeCount] = useState(0);
   const [currentStroke, setCurrentStroke] = useState(0);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     if (!containerRef.current) return;
     setLoading(true);
     setError(false);
+
+    const isDark = resolvedTheme === 'dark';
+    const strokeColor = isDark ? '#f5f5f4' : '#1c1917';      // stone-100 vs stone-900
+    const radicalColor = isDark ? '#f87171' : '#dc2626';     // red-400 vs red-600
+    const outlineColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
     // Dynamically import hanzi-writer
     import('hanzi-writer').then((HanziWriter) => {
@@ -32,12 +39,12 @@ export function StrokeOrder({ character }: StrokeOrderProps) {
         width: 300,
         height: 300,
         padding: 30,
-        strokeColor: '#1a1a1a',
-        radicalColor: '#404040',
-        strokeAnimationSpeed: 1,
-        delayBetweenStrokes: 500,
+        strokeColor,
+        radicalColor,
+        strokeAnimationSpeed: 1.2,
+        delayBetweenStrokes: 400,
         showOutline: true,
-        outlineColor: 'rgba(0,0,0,0.08)',
+        outlineColor,
         onLoadCharDataSuccess: (data: any) => {
           setStrokeCount(data.strokes?.length ?? 0);
           setLoading(false);
@@ -59,7 +66,7 @@ export function StrokeOrder({ character }: StrokeOrderProps) {
         writerRef.current.hideCharacter();
       }
     };
-  }, [character]);
+  }, [character, resolvedTheme]);
 
   const animate = () => {
     writerRef.current?.animateCharacter({

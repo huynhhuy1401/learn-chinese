@@ -87,61 +87,61 @@ export default function SoundDetailPage() {
   }).slice(0, 20);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link href="/pinyin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
+    <div className="max-w-2xl mx-auto px-4 py-8 animate-fade-in-down">
+      <Link href="/pinyin" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
         <ChevronLeft className="w-4 h-4" /> Back to Pinyin Guide
       </Link>
 
       {/* Hero */}
-      <Card className="p-8 text-center rounded-3xl border-2 border-gray-200 dark:border-gray-700 mb-8">
-        <p className="text-7xl sm:text-8xl font-bold mb-4 text-red-600 dark:text-red-400">{decoded}</p>
-        <Badge className="mb-2">{info.type === 'initial' ? 'Initial (Consonant)' : 'Final (Vowel)'}</Badge>
-        <h1 className="text-lg font-medium mt-2 mb-4 text-muted-foreground">How to pronounce the <span className="text-red-600 font-bold">{decoded}</span> sound</h1>
+      <Card className="p-8 text-center bg-card/70 backdrop-blur-md border rounded-3xl shadow-sm shadow-red-950/[0.01] mb-8">
+        <p className="text-7xl sm:text-8xl font-black mb-4 text-primary tracking-tight">{decoded}</p>
+        <Badge className="mb-2" variant="secondary">{info.type === 'initial' ? 'Initial (Consonant)' : 'Final (Vowel)'}</Badge>
+        <h1 className="text-sm font-medium mt-2 mb-4 text-muted-foreground">How to pronounce the <span className="text-primary font-bold">{decoded}</span> sound</h1>
 
-        <div className="flex items-start gap-3 bg-[#e8f0fe] dark:bg-blue-950/20 rounded-2xl p-5 border border-blue-100 dark:border-blue-900/30 text-left">
-          <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 bg-secondary/80 dark:bg-zinc-800/40 rounded-2xl p-5 border text-left shadow-sm">
+          <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold mb-1">Tongue & Mouth Position</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">{info.tip}</p>
+            <p className="text-sm font-bold mb-1">Tongue & Mouth Position</p>
+            <p className="text-sm text-muted-foreground leading-relaxed font-light">{info.tip}</p>
           </div>
         </div>
       </Card>
 
       {/* Example Words */}
       <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <Volume2 className="w-5 h-5 text-red-600" /> Example Words
+        <Volume2 className="w-5 h-5 text-primary animate-pulse" /> Example Words
       </h2>
-      <p className="text-muted-foreground mb-6 text-sm">
-        These words all use the <strong>{decoded}</strong> sound. Listen to each one and practice.
+      <p className="text-muted-foreground mb-6 text-sm font-light">
+        These HSK 1 vocabulary words use the <span className="font-bold text-foreground">{decoded}</span> sound. Listen to each one and copy the pronunciation.
       </p>
 
       {examples.length > 0 ? (
-        <div className="grid gap-2">
+        <div className="grid gap-3">
           {examples.map((word: any) => (
             <Link key={word.id} href={`/vocabulary/${word.id}`}>
-              <Card className="p-4 flex items-center justify-between hover:border-red-200 transition-all cursor-pointer">
+              <Card className="p-4 flex items-center justify-between bg-card/70 border hover:border-primary/20 transition-all cursor-pointer card-hover shadow-sm shadow-red-950/[0.01]">
                 <div className="flex items-center gap-3">
                   <PronounceButton text={word.character} size="md" />
                   <div>
-                    <span className="text-lg font-bold text-red-600 dark:text-red-400">{word.pinyin}</span>
+                    <span className="text-lg font-bold text-primary">{word.pinyin}</span>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-sm cn-display">{word.character}</span>
-                      <span className="text-sm text-muted-foreground">— {word.english}</span>
+                      <span className="text-sm font-bold cn-display">{word.character}</span>
+                      <span className="text-xs text-muted-foreground">— {word.english}</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold">{word.english}</p>
-                  <Badge variant="secondary" className="text-[10px]">{word.category}</Badge>
+                  <p className="text-sm font-bold">{word.english}</p>
+                  <Badge variant="secondary" className="text-[10px] mt-1 font-semibold">{word.category}</Badge>
                 </div>
               </Card>
             </Link>
           ))}
         </div>
       ) : (
-        <Card className="p-8 text-center text-muted-foreground">
-          <Lightbulb className="w-8 h-8 mx-auto mb-2 opacity-50" />
-          <p>No vocabulary words found with this sound yet.</p>
+        <Card className="p-8 text-center text-muted-foreground bg-card/70 border rounded-2xl">
+          <Lightbulb className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
+          <p className="font-light">No vocabulary words found with this sound yet.</p>
         </Card>
       )}
     </div>

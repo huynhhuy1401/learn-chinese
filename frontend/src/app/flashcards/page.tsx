@@ -141,7 +141,7 @@ export default function FlashcardsPage() {
       </div>
 
       {/* Card */}
-      <div className="rounded-3xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-900 p-8 sm:p-12 text-center">
+      <div className="rounded-3xl border bg-card/85 backdrop-blur-sm p-8 sm:p-12 text-center shadow-lg shadow-red-950/[0.01]">
         <div className="flex items-center justify-center gap-4 mb-6">
           <span className="text-7xl sm:text-8xl font-bold cn-display select-none leading-none">
             {word.character}
@@ -149,28 +149,29 @@ export default function FlashcardsPage() {
           <PronounceButton text={word.character} size="md" />
         </div>
 
-        <p className="text-sm text-muted-foreground mb-6">What does this mean?</p>
+        <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-6">What does this mean?</p>
 
         {!revealed ? (
-          <Button size="lg" onClick={handleReveal} className="rounded-2xl px-10 h-14 text-lg bg-red-600 hover:bg-red-700">
+          <Button size="lg" onClick={handleReveal} className="rounded-2xl px-10 h-14 text-base font-semibold bg-primary text-primary-foreground btn-premium">
             <Eye className="w-5 h-5 mr-2" /> Show Answer
           </Button>
         ) : (
-          <div>
-            <div className="rounded-2xl bg-[#e8f0fe] dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 p-5 mb-6">
-              <p className="text-2xl font-semibold text-red-600 dark:text-red-400 mb-1">{word.pinyin}</p>
-              <p className="text-3xl font-bold">{word.english}</p>
+          <div className="animate-fade-in">
+            <div className="rounded-2xl bg-secondary/85 dark:bg-zinc-800/40 border p-5 mb-6">
+              <p className="text-2xl font-bold text-primary mb-1">{word.pinyin}</p>
+              <p className="text-3xl font-black tracking-tight">{word.english}</p>
             </div>
             {word.travelSentence && (
-              <div className="rounded-xl bg-muted/30 p-4 mb-6 text-left">
-                <p className="text-lg font-medium cn-display">{word.travelSentence}</p>
+              <div className="rounded-2xl bg-muted/40 border p-4 mb-6 text-left">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-bold mb-2">Context Sentence</p>
+                <p className="text-lg font-bold cn-display leading-normal">{word.travelSentence}</p>
               </div>
             )}
             <div className="flex justify-center gap-3">
-              <Button size="lg" variant="outline" className="rounded-2xl h-14 px-6 border-2 border-amber-300" onClick={() => handleResult(false)}>
+              <Button size="lg" variant="outline" className="rounded-2xl h-14 px-6 border-2 border-amber-300 dark:border-amber-950 hover:bg-amber-500/10 font-semibold" onClick={() => handleResult(false)}>
                 <RotateCcw className="w-5 h-5 mr-2 text-amber-500" /> Again
               </Button>
-              <Button size="lg" className="rounded-2xl h-14 px-8 bg-green-600 hover:bg-green-700" onClick={() => handleResult(true)}>
+              <Button size="lg" className="rounded-2xl h-14 px-8 bg-green-600 hover:bg-green-700 text-white font-semibold shadow-lg shadow-green-500/15" onClick={() => handleResult(true)}>
                 <CheckCircle2 className="w-5 h-5 mr-2" /> Got It
               </Button>
             </div>
@@ -179,8 +180,8 @@ export default function FlashcardsPage() {
       </div>
 
       {!revealed && (
-        <p className="text-center text-xs text-muted-foreground mt-4">
-          Press <kbd className="px-1.5 py-0.5 bg-white dark:bg-zinc-800 rounded text-[11px] font-mono border">Space</kbd> to reveal
+        <p className="text-center text-xs text-muted-foreground mt-6 font-light">
+          Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[11px] font-mono border">Space</kbd> to reveal
         </p>
       )}
     </div>

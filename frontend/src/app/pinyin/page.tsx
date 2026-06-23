@@ -113,43 +113,84 @@ const finals = [
   { sound: 'uang', group: 'Nasal+Glide', example: '王 (wáng)', pronounceText: '王', tip: 'u + a + ng. Rounded start, open middle, ng end. Like "wahng". Keep lips rounded at the start.' },
 ];
 
+
+function ToneVisual({ number }: { number: string }) {
+  if (number === '1') {
+    return (
+      <svg className="w-14 h-9 stroke-current text-rose-500" viewBox="0 0 100 60" fill="none" strokeWidth="7" strokeLinecap="round">
+        <line x1="20" y1="30" x2="80" y2="30" className="tone-path" />
+      </svg>
+    );
+  }
+  if (number === '2') {
+    return (
+      <svg className="w-14 h-9 stroke-current text-orange-500" viewBox="0 0 100 60" fill="none" strokeWidth="7" strokeLinecap="round">
+        <path d="M20,45 L80,15" className="tone-path" />
+      </svg>
+    );
+  }
+  if (number === '3') {
+    return (
+      <svg className="w-14 h-9 stroke-current text-emerald-500" viewBox="0 0 100 60" fill="none" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15,22 L45,45 L85,15" className="tone-path" />
+      </svg>
+    );
+  }
+  if (number === '4') {
+    return (
+      <svg className="w-14 h-9 stroke-current text-blue-500" viewBox="0 0 100 60" fill="none" strokeWidth="7" strokeLinecap="round">
+        <path d="M20,15 L80,45" className="tone-path" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="w-14 h-9 fill-current text-muted-foreground/60" viewBox="0 0 100 60">
+      <circle cx="50" cy="30" r="7" />
+    </svg>
+  );
+}
+
 export default function PinyinGuidePage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-2">Pinyin Pronunciation Guide</h1>
-      <p className="text-muted-foreground mb-8">
-        Pinyin is the romanization system for Chinese. Master these sounds and you can read any
-        Chinese word aloud.
+    <div className="max-w-4xl mx-auto px-4 py-12 animate-fade-in-down">
+      <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Pinyin Pronunciation Guide</h1>
+      <p className="text-muted-foreground mb-8 font-light">
+        Pinyin is the romanization system for Chinese characters. Master these sound paths and tones to read any HSK 1 word with confidence.
       </p>
 
       {/* The 5 Tones */}
       <section className="mb-12">
         <h2 className="text-2xl font-bold mb-4">The Five Tones</h2>
-        <p className="text-muted-foreground mb-4">
-          Chinese is a tonal language — the tone you use changes the meaning completely.
-          mā (mother) ≠ mǎ (horse) ≠ mà (to scold)!
+        <p className="text-muted-foreground mb-6 font-light">
+          Chinese is a tonal language — a shift in tone completely changes the meaning.
+          For example: <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-rose-600 font-bold">mā</code> (mother) vs. <code className="bg-muted px-1.5 py-0.5 rounded font-mono text-emerald-600 font-bold">mǎ</code> (horse)!
         </p>
 
         <div className="space-y-3">
           {tones.map((tone) => (
-            <Card key={tone.name} className={`p-5 ${tone.color}`}>
-              <div className="flex items-start justify-between gap-4">
+            <Card key={tone.name} className={`p-5 card-hover bg-white/70 dark:bg-zinc-900/50 border`}>
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge>Tone {tone.number}</Badge>
-                    <h3 className="font-semibold">{tone.name}</h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="secondary" className="font-bold">Tone {tone.number}</Badge>
+                    <h3 className="font-bold text-base">{tone.name}</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{tone.description}</p>
-                  <p className="text-lg font-medium">
-                    {tone.example} — {tone.meaning}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Tone mark: <code className="bg-muted px-1 rounded">{tone.mark}</code>
+                  <p className="text-sm text-muted-foreground mb-2 font-light">{tone.description}</p>
+                  <p className="text-base font-semibold">
+                    Example: <span className="cn-display text-lg font-bold mr-1">{tone.example.split(' ')[0]}</span>
+                    <span className="text-sm text-muted-foreground font-light">{tone.example.split(' ').slice(1).join(' ')}</span>
+                    <span className="text-xs text-muted-foreground font-light ml-2">({tone.meaning})</span>
                   </p>
                 </div>
-                <div className="flex flex-col items-center gap-1 shrink-0">
-                  <PronounceButton text={tone.pronounceText} size="md" />
-                  <span className="text-xs text-muted-foreground">Listen</span>
+                
+                <div className="flex items-center gap-4 shrink-0">
+                  <div className="bg-muted/50 dark:bg-zinc-800/40 p-2 rounded-2xl border flex items-center justify-center shadow-inner">
+                    <ToneVisual number={tone.number} />
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <PronounceButton text={tone.pronounceText} size="md" />
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Listen</span>
+                  </div>
                 </div>
               </div>
             </Card>

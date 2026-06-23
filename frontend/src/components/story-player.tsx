@@ -71,6 +71,36 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
     reflective: '📝',
   };
 
+  const renderDialogue = (dialogueText: string) => {
+    if (!dialogueText) return null;
+    return (
+      <div className="space-y-4 bg-muted/40 dark:bg-zinc-800/10 rounded-2xl p-5 border border-border/80">
+        {dialogueText.split('\n').map((line, i) => {
+          const hasSpeaker = line.includes(':');
+          if (!hasSpeaker) {
+            return <p key={i} className="text-xs italic text-muted-foreground text-center my-1">{line}</p>;
+          }
+          const [speaker, ...rest] = line.split(':');
+          const text = rest.join(':').trim();
+          const isLily = speaker.trim().toLowerCase() === 'lily';
+          
+          return (
+            <div key={i} className={`flex flex-col ${isLily ? 'items-end' : 'items-start'} animate-fade-in`}>
+              <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider mb-1 px-1">{speaker}</span>
+              <div className={`px-4 py-2.5 rounded-2xl max-w-[85%] text-sm shadow-sm leading-relaxed ${
+                isLily 
+                  ? 'bg-primary text-primary-foreground rounded-tr-none' 
+                  : 'bg-card border text-foreground rounded-tl-none cn-display'
+              }`}>
+                {text}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (!scene) return null;
 
   return (
@@ -87,10 +117,11 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
       <div className="transition-all duration-300" style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(8px)' }}>
         {/* INTRO / SCENE */}
         {(scene.type === 'intro' || scene.type === 'scene') && (
-          <Card className="overflow-hidden rounded-3xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-900">
+          <Card className="overflow-hidden rounded-3xl border bg-card/70 backdrop-blur-md shadow-lg shadow-red-950/[0.02]">
             {provinceImage && (
-              <div className="h-40 overflow-hidden">
+              <div className="h-40 overflow-hidden relative">
                 <img src={provinceImage} alt={provinceName} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
               </div>
             )}
             <div className="p-6 sm:p-8">
@@ -99,20 +130,13 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
                 <Badge variant="secondary" className="capitalize">{scene.speaker}</Badge>
               </div>
               <h2 className="text-xl font-bold mb-4">{scene.title}</h2>
-              <p className="text-muted-foreground leading-relaxed mb-6">{scene.narrative}</p>
+              <p className="text-muted-foreground leading-relaxed mb-6 font-light">{scene.narrative}</p>
 
               {/* Dialogue bubble */}
-              <div className="relative bg-[#e8f0fe] dark:bg-blue-950/20 rounded-2xl p-4 border border-blue-100 dark:border-blue-900/30">
-                <MessageCircle className="absolute -top-3 left-4 w-6 h-6 text-blue-400" />
-                {scene.dialogue.split('\n').map((line, i) => (
-                  <p key={i} className={`text-base leading-relaxed ${line.startsWith('Lily:') ? 'font-medium' : 'text-muted-foreground'}`}>
-                    {line}
-                  </p>
-                ))}
-              </div>
+              {renderDialogue(scene.dialogue)}
 
               <div className="mt-6 text-center">
-                <Button onClick={advance} size="lg" className="rounded-2xl px-8">
+                <Button onClick={advance} size="lg" className="rounded-2xl px-8 btn-premium bg-primary text-primary-foreground">
                   Continue <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -123,46 +147,41 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
         {/* LEARN */}
         {scene.type === 'learn' && scene.words && (
           <div className="space-y-4">
-            <Card className="rounded-3xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-900 p-6 sm:p-8">
+            <Card className="rounded-3xl border bg-card/70 backdrop-blur-md shadow-lg shadow-red-950/[0.02] p-6 sm:p-8">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">{moods[scene.mood] || '📖'}</span>
                 <Badge variant="secondary" className="capitalize">{scene.speaker}</Badge>
               </div>
               <h2 className="text-xl font-bold mb-3">{scene.title}</h2>
-              <p className="text-muted-foreground leading-relaxed mb-6">{scene.narrative}</p>
+              <p className="text-muted-foreground leading-relaxed mb-6 font-light">{scene.narrative}</p>
 
               {/* Dialogue */}
-              <div className="relative bg-[#e8f0fe] dark:bg-blue-950/20 rounded-2xl p-4 border border-blue-100 dark:border-blue-900/30 mb-6">
-                <MessageCircle className="absolute -top-3 left-4 w-6 h-6 text-blue-400" />
-                {scene.dialogue.split('\n').map((line, i) => (
-                  <p key={i} className={`text-base leading-relaxed ${line.startsWith('Lily:') || line.startsWith("Stranger:") || line.startsWith("Auntie Zhang:") ? 'font-medium cn-display' : 'text-muted-foreground'}`}>
-                    {line}
-                  </p>
-                ))}
+              <div className="mb-6">
+                {renderDialogue(scene.dialogue)}
               </div>
 
               {/* New words */}
               <div className="space-y-3">
-                <p className="text-sm font-semibold flex items-center gap-1">
-                  <BookOpen className="w-4 h-4" /> New Words
+                <p className="text-xs uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1">
+                  <BookOpen className="w-3.5 h-3.5 text-primary" /> New Vocabulary
                 </p>
                 {scene.words.map((word, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30">
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-2xl bg-muted/40 border hover:border-primary/20 transition-all card-hover">
                     <PronounceButton text={word.character} />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl font-bold cn-display">{word.character}</span>
-                        <span className="text-sm text-red-600 dark:text-red-400 font-medium">{word.pinyin}</span>
+                        <span className="text-sm text-red-600 dark:text-red-400 font-semibold">{word.pinyin}</span>
                       </div>
-                      <p className="text-base font-semibold">{word.english}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 italic">{word.context}</p>
+                      <p className="text-base font-semibold mt-0.5">{word.english}</p>
+                      <p className="text-xs text-muted-foreground mt-1 italic font-light">{word.context}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className="mt-6 text-center">
-                <Button onClick={advance} size="lg" className="rounded-2xl px-8">
+                <Button onClick={advance} size="lg" className="rounded-2xl px-8 btn-premium bg-primary text-primary-foreground">
                   Got it <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
@@ -172,49 +191,44 @@ export function StoryPlayer({ storyContent, provinceName, provinceColor, provinc
 
         {/* QUIZ */}
         {scene.type === 'quiz' && (
-          <Card className="rounded-3xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-zinc-900 p-6 sm:p-8">
+          <Card className="rounded-3xl border bg-card/70 backdrop-blur-md shadow-lg shadow-red-950/[0.02] p-6 sm:p-8">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-2xl">✏️</span>
               <Badge variant="secondary">Quiz</Badge>
             </div>
             <h2 className="text-xl font-bold mb-3">{scene.title}</h2>
-            <p className="text-muted-foreground leading-relaxed mb-4">{scene.narrative}</p>
+            <p className="text-muted-foreground leading-relaxed mb-4 font-light">{scene.narrative}</p>
 
             {/* Dialogue */}
-            <div className="relative bg-[#e8f0fe] dark:bg-blue-950/20 rounded-2xl p-4 border border-blue-100 dark:border-blue-900/30 mb-6">
-              <MessageCircle className="absolute -top-3 left-4 w-6 h-6 text-blue-400" />
-              {scene.dialogue?.split('\n').map((line, i) => (
-                <p key={i} className={`text-base leading-relaxed ${line.includes(':') ? 'font-medium' : 'text-muted-foreground'}`}>
-                  {line}
-                </p>
-              ))}
+            <div className="mb-6">
+              {renderDialogue(scene.dialogue)}
             </div>
 
-            <p className="text-lg font-semibold mb-4">{scene.question}</p>
+            <p className="text-lg font-bold mb-4">{scene.question}</p>
 
             {!quizAnswered ? (
               <div className="grid grid-cols-2 gap-3">
                 {scene.options?.map((opt) => (
-                  <Button key={opt} variant="outline" className="h-auto py-4 px-4 text-base justify-start rounded-xl border-2 hover:border-red-300"
+                  <Button key={opt} variant="outline" className="h-auto py-4 px-4 text-base justify-start rounded-2xl border-2 hover:border-primary/50 transition-all text-left whitespace-normal font-medium"
                     onClick={() => handleQuizAnswer(opt)}>
-                    {opt}
+                    {opt.split('(')[0].trim()}
                   </Button>
                 ))}
               </div>
             ) : (
               <div>
-                <div className={`flex items-center gap-3 p-4 rounded-xl mb-4 ${
-                  quizCorrect ? 'bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800'
-                    : 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800'
+                <div className={`flex items-center gap-3 p-4 rounded-2xl mb-4 border ${
+                  quizCorrect ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300'
+                    : 'bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-300'
                 }`}>
-                  {quizCorrect ? <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" /> : <XCircle className="w-6 h-6 text-red-600 shrink-0" />}
+                  {quizCorrect ? <CheckCircle2 className="w-6 h-6 text-green-500 shrink-0" /> : <XCircle className="w-6 h-6 text-red-500 shrink-0" />}
                   <div>
-                    <p className="font-semibold text-base">{quizCorrect ? 'Correct! 🎉' : 'Not quite'}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5 cn-display">{scene.answer}</p>
+                    <p className="font-bold text-base">{quizCorrect ? 'Correct! 🎉' : 'Not quite'}</p>
+                    <p className="text-sm font-medium mt-0.5 cn-display">{scene.answer}</p>
                   </div>
                 </div>
-                <p className="text-muted-foreground leading-relaxed mb-4 italic">{scene.feedback}</p>
-                <Button onClick={advance} size="lg" className="w-full rounded-2xl">
+                <p className="text-muted-foreground leading-relaxed mb-4 italic font-light text-sm">{scene.feedback}</p>
+                <Button onClick={advance} size="lg" className="w-full rounded-2xl btn-premium bg-primary text-primary-foreground">
                   Continue <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>

@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Eraser, Eye, EyeOff } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 interface CharacterCanvasProps {
   character: string;
@@ -13,6 +14,9 @@ export function CharacterCanvas({ character }: CharacterCanvasProps) {
   const [isDrawing, setIsDrawing] = useState(false);
   const [showTemplate, setShowTemplate] = useState(true);
   const [hasDrawn, setHasDrawn] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  const isDark = resolvedTheme === 'dark';
 
   // Redraw function: template + user drawing
   const redraw = useCallback(() => {
@@ -31,7 +35,7 @@ export function CharacterCanvas({ character }: CharacterCanvasProps) {
       ctx.font = `220px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = 'rgba(180, 180, 180, 0.25)';
+      ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)';
       ctx.fillText(character, canvas.width / 2, canvas.height / 2);
     }
 
@@ -39,7 +43,7 @@ export function CharacterCanvas({ character }: CharacterCanvasProps) {
     if (existing) {
       ctx.putImageData(existing, 0, 0);
     }
-  }, [character, showTemplate]);
+  }, [character, showTemplate, isDark, hasDrawn]);
 
   useEffect(() => { redraw(); }, [redraw]);
 
@@ -64,13 +68,13 @@ export function CharacterCanvas({ character }: CharacterCanvasProps) {
     const pos = getPos(e);
     ctx.beginPath();
     ctx.moveTo(pos.x, pos.y);
-    ctx.strokeStyle = '#1a1a1a';
+    ctx.strokeStyle = isDark ? '#f5f5f4' : '#1c1917';
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     setIsDrawing(true);
     setHasDrawn(true);
-  }, [getPos]);
+  }, [getPos, isDark]);
 
   const draw = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();

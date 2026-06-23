@@ -91,20 +91,20 @@ export function LessonPractice({ exercises, onComplete, onSubmitAnswer }: Lesson
                 key={opt}
                 variant="outline"
                 disabled={submitting}
-                className="h-auto py-4 px-4 text-base justify-center rounded-xl border-2 hover:border-red-300 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition-all"
+                className="h-auto py-4 px-4 text-base justify-center rounded-xl border-2 hover:border-red-300 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition-all font-semibold"
                 onClick={() => handleAnswer(opt)}
               >
-                {opt}
+                {opt.split('(')[0].trim()}
               </Button>
             ))}
           </div>
         ) : (
           <div className="max-w-lg mx-auto">
             {/* Feedback */}
-            <div className={`flex items-center gap-3 p-4 rounded-xl mb-4 ${
+            <div className={`flex items-center gap-3 p-4 rounded-xl mb-4 border ${
               answered.correct
-                ? 'bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800'
-                : 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800'
+                ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300'
+                : 'bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-300'
             }`}>
               {answered.correct ? (
                 <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0" />
@@ -112,14 +112,12 @@ export function LessonPractice({ exercises, onComplete, onSubmitAnswer }: Lesson
                 <XCircle className="w-6 h-6 text-red-600 shrink-0" />
               )}
               <div>
-                <p className="font-semibold text-base">
+                <p className="font-bold text-base">
                   {answered.correct ? 'Correct! 🎉' : 'Not quite'}
                 </p>
-                {!answered.correct && (
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Answer: <strong>{answered.correctAnswer}</strong>
-                  </p>
-                )}
+                <p className="text-sm mt-0.5 opacity-90 font-medium">
+                  Correct: <strong className="cn-display">{answered.correctAnswer}</strong>
+                </p>
               </div>
             </div>
 
