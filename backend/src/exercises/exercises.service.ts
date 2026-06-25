@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ExerciseStrategyFactory } from './strategies/exercise-strategy.factory';
 
 @Injectable()
 export class ExercisesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private strategyFactory: ExerciseStrategyFactory,
+  ) {}
 
   async findByProvince(provinceId: string) {
     return this.prisma.exercise.findMany({
@@ -11,12 +15,21 @@ export class ExercisesService {
     });
   }
 
-  async checkAnswer(exerciseId: string, answer: string) {
+  async checkAnswer(exerciseId: string, answer: string | Record<string, string>) {
     const exercise = await this.prisma.exercise.findUnique({
       where: { id: exerciseId },
     });
-    if (!exercise) return { correct: false, correctAnswer: '' };
-    const correct = exercise.correctAnswer.toLowerCase() === answer.toLowerCase().trim();
-    return { correct, correctAnswer: correct ? answer : exercise.correctAnswer };
+    if (!exercise) {
+      return { correct: false, partialCredit: 0, correctAnswer: '', wordId: null };
+    }
+    const result = this.strategyFactory
+      .for(exercise.type)
+      .evaluate(exercise, answer);
+    return {
+      correct: result.correct,
+      partialCredit: result.partialCredit,
+      correctAnswer: result.correctAnswer,
+      wordId: exercise.wordId,
+    };
   }
 }

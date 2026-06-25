@@ -3,32 +3,24 @@
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { Button } from './ui/button';
-import { BookOpen, GraduationCap, LogOut, Menu, X, Library, Languages, AudioLines, Bookmark } from 'lucide-react';
+import { BookOpen, GraduationCap, LogOut, Menu, X, Library, Languages, AudioLines, Bookmark, Brain } from 'lucide-react';
+import { useAuth } from './auth/auth-provider';
 
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const { user, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Tracks whether client-mounted; SSR has no user until effect runs.
+  useEffect(() => setHydrated(true), []);
 
   const isInLesson = pathname?.startsWith('/lessons/') && pathname !== '/lessons';
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     router.push('/');
   };
 
@@ -36,6 +28,8 @@ export function Navbar() {
 
   // ====== HIDE NAVBAR IN LESSONS ======
   if (isInLesson) return null;
+
+  const showAuthUI = hydrated && !!user;
 
   // ====== FULL NAVBAR (all other pages) ======
   return (
@@ -50,10 +44,15 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-2">
-          {user ? (
+          {showAuthUI ? (
             <>
               <Link href="/dashboard">
                 <Button variant={isActive('/dashboard') ? 'secondary' : 'ghost'} size="sm" className="rounded-xl font-medium">Dashboard</Button>
+              </Link>
+              <Link href="/practice">
+                <Button variant={isActive('/practice') ? 'secondary' : 'ghost'} size="sm" className="rounded-xl font-medium">
+                  <Brain className="w-4 h-4 mr-1.5 text-primary" /> Practice
+                </Button>
               </Link>
               <Link href="/courses">
                 <Button variant={isActive('/courses') ? 'secondary' : 'ghost'} size="sm" className="rounded-xl font-medium">
@@ -106,9 +105,10 @@ export function Navbar() {
       {/* Mobile nav */}
       {menuOpen && (
         <div className="md:hidden border-t px-4 py-3 space-y-2 bg-white dark:bg-zinc-950">
-          {user ? (
+          {showAuthUI ? (
             <>
               <Link href="/dashboard" className="block py-1" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+              <Link href="/practice" className="block py-1" onClick={() => setMenuOpen(false)}>Practice</Link>
               <Link href="/courses" className="block py-1" onClick={() => setMenuOpen(false)}>Courses</Link>
               <Link href="/vocabulary" className="block py-1" onClick={() => setMenuOpen(false)}>Vocabulary</Link>
               <Link href="/grammar" className="block py-1" onClick={() => setMenuOpen(false)}>Grammar</Link>

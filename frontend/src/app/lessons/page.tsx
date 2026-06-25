@@ -1,37 +1,20 @@
 'use client';
 
-import { gql, useQuery } from '@apollo/client';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, ChevronRight, Lock, CheckCircle2, BookOpen, MapPin, ChefHat } from 'lucide-react';
-
-const PROVINCES_QUERY = gql`
-  query Provinces {
-    provinces { id name capital unlockOrder color imageUrl culturalDescription food landmark vocabulary { id } grammar { id } }
-  }
-`;
-
-const PROGRESS_QUERY = gql`
-  query UserProgress { userProgress { provinceId completed score exercisesDone } }
-`;
+import { Loader2, Lock, CheckCircle2, BookOpen } from 'lucide-react';
+import { useAuth } from '@/components/auth/auth-provider';
+import { useProvinces, useUserProgress } from '@/hooks/use-graphql';
 
 export default function LessonsPage() {
-  const [userId, setUserId] = useState<string | null>(null);
+  const { session, loading: authLoading } = useAuth();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUserId(data.session?.user?.id ?? null);
-    });
-  }, []);
+  const { data, loading } = useProvinces();
+  const { data: progressData } = useUserProgress(!session);
 
-  const { data, loading } = useQuery(PROVINCES_QUERY);
-  const { data: progressData } = useQuery(PROGRESS_QUERY, { skip: !userId });
-
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -39,14 +22,14 @@ export default function LessonsPage() {
     );
   }
 
-  const provinces = data?.provinces ?? [];
-  const progress = progressData?.userProgress ?? [];
+  const provinces = (data?.provinces ?? []) as Array<any>;
+  const progress = (progressData?.userProgress ?? []) as Array<any>;
   const completedIds = new Set(progress.filter((p: any) => p.completed).map((p: any) => p.provinceId));
   const progressMap = new Map(progress.map((p: any) => [p.provinceId, p]));
 
   const completedCount = completedIds.size;
   const totalScore = progress.reduce((s: number, p: any) => s + p.score, 0);
-  const totalDone = progress.reduce((s: number, p: any) => s + p.exercisesDone, 0);
+  const totalDone = progress.reduce((s: number, p: any) => s + (p.exercisesDone ?? 0), 0);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
@@ -59,7 +42,7 @@ export default function LessonsPage() {
       </div>
 
       {/* Progress summary */}
-      {userId && (
+      {session && (
         <div className="grid grid-cols-3 gap-3 mb-10">
           <Card className="p-4 text-center">
             <p className="text-2xl font-bold text-red-600">{completedCount}/9</p>
@@ -79,15 +62,11 @@ export default function LessonsPage() {
       {/* Lesson cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {[...provinces]
-          .sort((a: any, b: any) => a.unlockOrder - b.unlockOrder)
-          .map((province: any, i: number) => {
+          .sort((a, b) => a.unlockOrder - b.unlockOrder)
+          .map((province, i) => {
             const isCompleted = completedIds.has(province.id);
-            const isLocked =
-              i > 0 &&
-              !isCompleted &&
-              !completedIds.has(
-                provinces.find((p: any) => p.unlockOrder === province.unlockOrder - 1)?.id ?? '',
-              );
+            const prevId = provinces.find((p) => p.unlockOrder === province.unlockOrder - 1)?.id ?? '';
+            const isLocked = i > 0 && !isCompleted && !completedIds.has(prevId);
             const p: any = progressMap.get(province.id);
 
             return (
@@ -173,7 +152,7 @@ export default function LessonsPage() {
           })}
       </div>
 
-      {!userId && (
+      {!session && (
         <div className="text-center mt-8 p-8 bg-muted/50 rounded-2xl">
           <p className="text-muted-foreground mb-3">Create an account to track your progress.</p>
           <Link href="/register">

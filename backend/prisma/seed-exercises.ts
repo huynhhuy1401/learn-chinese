@@ -1,13 +1,14 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ExerciseType } from '@prisma/client';
+import { createPrismaClient } from './seed-client';
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 async function main() {
   await prisma.exercise.deleteMany();
 
   const provinces = await prisma.province.findMany({ orderBy: { unlockOrder: 'asc' } });
 
-  const exercises: Record<string, { type: string; question: string; questionLabel: string; options: string; correctAnswer: string }[]> = {
+  const exercises: Record<string, { type: ExerciseType; question: string; questionLabel: string; options: string; correctAnswer: string }[]> = {
     Beijing: [
       { type: 'CULTURAL', question: 'What does "你好" (nǐ hǎo) mean?', questionLabel: 'Greetings', options: JSON.stringify(['Hello', 'Goodbye', 'Thank you', 'Sorry']), correctAnswer: 'Hello' },
       { type: 'CULTURAL', question: 'Which famous dish is Beijing known for?', questionLabel: 'Beijing Food Culture', options: JSON.stringify(['Hotpot (火锅)', 'Peking Duck (北京烤鸭)', 'Dim Sum (点心)', 'Xiaolongbao (小笼包)']), correctAnswer: 'Peking Duck (北京烤鸭)' },

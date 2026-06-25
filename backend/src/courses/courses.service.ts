@@ -18,7 +18,9 @@ export class CoursesService {
       include: {
         provinces: {
           orderBy: { unlockOrder: 'asc' },
-          include: { _count: { select: { vocabulary: true, exercises: true } } },
+          include: {
+            _count: { select: { vocabulary: true, exercises: true } },
+          },
         },
       },
     });

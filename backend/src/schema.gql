@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""FSRS card lifecycle state."""
+enum CardState {
+  GRADUATED
+  LEARNING
+  NEW
+  RELEARNING
+  REVIEW
+}
+
 type Course {
   description: String!
   id: ID!
@@ -17,18 +26,46 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type DueCard {
+  category: String!
+  character: String!
+  english: String!
+  masteryLevel: Int!
+  pinyin: String!
+  state: String!
+  travelSentence: String
+  wordId: ID!
+}
+
 type Exercise {
   correctAnswer: String!
   id: ID!
   options: String!
   question: String!
   questionLabel: String
-  type: String!
+  type: ExerciseType!
 }
 
 type ExerciseResult {
   correct: Boolean!
   correctAnswer: String!
+  exerciseId: ID!
+  exercisesDone: Float!
+  partialCredit: Float!
+  score: Float!
+}
+
+"""Type of exercise item."""
+enum ExerciseType {
+  CULTURAL
+  FILL_BLANK
+  LISTENING
+  MATCHING
+  MULTIPLE_CHOICE
+  RECALL_MEANING
+  RECALL_READING
+  TONE
+  WRITING
 }
 
 type GrammarPoint {
@@ -39,11 +76,13 @@ type GrammarPoint {
 }
 
 type Mutation {
-  completeProvince(provinceId: ID!): UserProgress!
-  reviewWord(correct: Boolean!, wordId: ID!): UserWordProgress!
-  saveWord(wordId: ID!): SavedWordResult!
-  submitAnswer(answer: String!, exerciseId: String!, provinceId: ID!): ExerciseResult!
-  unsaveWord(wordId: ID!): Boolean!
+  completeProvince(input: ProvinceIdInput!): UserProgress!
+  recordReview(input: RecordReviewInput!): ReviewResult!
+  reviewWord(input: ReviewWordInput!): UserWordProgress!
+  saveWord(input: WordIdInput!): SavedWordResult!
+  startReviewSession(input: StartReviewSessionInput!): ReviewSessionRef!
+  submitAnswer(input: SubmitAnswerInput!): ExerciseResult!
+  unsaveWord(input: WordIdInput!): Boolean!
 }
 
 type Province {
@@ -66,15 +105,24 @@ type Province {
   vocabulary: [VocabularyWord!]
 }
 
+input ProvinceIdInput {
+  provinceId: ID!
+}
+
 type Query {
   course(id: ID!): Course
   courses: [Course!]!
+  currentUser: User!
+  dueCards(limit: Int! = 20, mode: ReviewMode! = DAILY, provinceId: ID): [DueCard!]!
   exercises(provinceId: ID!): [Exercise!]!
   grammar(provinceId: ID): [GrammarPoint!]!
+  isProvinceUnlocked(provinceId: ID!): Boolean!
   isWordSaved(wordId: ID!): Boolean!
   me: User!
+  nextProvince: Province
   province(id: ID!): Province
   provinces: [Province!]!
+  reviewStats: ReviewStats!
   savedWords: [SavedWordResult!]!
   userProgress: [UserProgress!]!
   vocabulary(provinceId: ID): [VocabularyWord!]!
@@ -82,10 +130,74 @@ type Query {
   wordProgress: [UserWordProgress!]!
 }
 
+input RecordReviewInput {
+  rating: ReviewRating!
+  sessionId: ID!
+  wordId: ID!
+}
+
+"""Type of review session."""
+enum ReviewMode {
+  DAILY
+  LESSON_POST
+  LESSON_PRE
+  SAVED_ONLY
+}
+
+"""FSRS review rating: AGAIN/Lapse, HARD, GOOD, EASY."""
+enum ReviewRating {
+  AGAIN
+  EASY
+  GOOD
+  HARD
+}
+
+type ReviewResult {
+  masteryLevel: Int!
+  nextReviewAt: DateTime!
+  sessionCorrect: Int!
+  sessionReviewed: Int!
+  state: String!
+  wordId: ID!
+}
+
+type ReviewSessionRef {
+  cards: [DueCard!]!
+  id: ID!
+  mode: ReviewMode!
+  totalCards: Int!
+}
+
+type ReviewStats {
+  cardsDue: Int!
+  longestStreak: Int!
+  newCardsToday: Int!
+  retentionPct: Int!
+  reviewedToday: Int!
+  streak: Int!
+}
+
+input ReviewWordInput {
+  correct: Boolean!
+  wordId: ID!
+}
+
 type SavedWordResult {
   createdAt: DateTime!
   id: ID!
   word: VocabularyWord!
+}
+
+input StartReviewSessionInput {
+  limit: Int = 20
+  mode: ReviewMode!
+  provinceId: ID
+}
+
+input SubmitAnswerInput {
+  answer: String!
+  exerciseId: String!
+  provinceId: ID!
 }
 
 type User {
@@ -107,9 +219,12 @@ type UserProgress {
 
 type UserWordProgress {
   id: ID!
-  lastReviewedAt: DateTime!
+  lapses: Int!
+  lastReviewedAt: DateTime
   masteryLevel: Int!
   nextReviewAt: DateTime!
+  reps: Int!
+  state: CardState!
   timesCorrect: Int!
   timesWrong: Int!
   userId: String!
@@ -121,10 +236,17 @@ type VocabularyWord {
   character: String!
   english: String!
   id: ID!
+  isDue: Boolean
+  isSaved: Boolean
   masteryLevel: Float
   pinyin: String!
   province: WordProvince
+  srsState: CardState
   travelSentence: String
+}
+
+input WordIdInput {
+  wordId: ID!
 }
 
 type WordProvince {

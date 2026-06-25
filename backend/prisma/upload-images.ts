@@ -1,13 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from './seed-client';
 import * as fs from 'fs';
 import * as path from 'path';
+
+const prisma = createPrismaClient();
 
 const SUPABASE_URL = 'http://127.0.0.1:54321';
 const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
-const prisma = new PrismaClient();
 
 const images: Record<string, string> = {
   Beijing: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=800&h=400&fit=crop',

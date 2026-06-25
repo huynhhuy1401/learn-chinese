@@ -3,10 +3,58 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum CourseLevel {
+  HSK1
+  HSK2
+  HSK3
+}
+
+enum ExerciseType {
+  MULTIPLE_CHOICE
+  RECALL_MEANING
+  RECALL_READING
+  LISTENING
+  TONE
+  WRITING
+  FILL_BLANK
+  MATCHING
+  CULTURAL
+}
+
+/// FSRS card state
+enum CardState {
+  NEW
+  LEARNING
+  REVIEW
+  RELEARNING
+  GRADUATED
+}
+
+/// FSRS review rating (1..4). AGAIN=Lapse, HARD/GOOD/EASY=Pass variants.
+enum ReviewRating {
+  AGAIN
+  HARD
+  GOOD
+  EASY
+}
+
+enum ReviewMode {
+  DAILY
+  SAVED_ONLY
+  LESSON_PRE
+  LESSON_POST
+}
+
+// ============================================================
+// Models
+// ============================================================
 
 model User {
   id        String   @id // Supabase auth.users id (UUID)
@@ -15,95 +63,110 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  progress     UserProgress[]
-  wordProgress UserWordProgress[]
-  savedWords   SavedWord[]
+  progress       UserProgress[]
+  wordProgress   UserWordProgress[]
+  savedWords     SavedWord[]
+  reviewSessions ReviewSession[]
+  streak         UserStreak?
 }
 
 model Course {
   id          String     @id @default(uuid())
   name        String     @unique
   description String
-  level       String     // "hsk1", "hsk2", etc.
+  level       CourseLevel
   imageUrl    String?
   createdAt   DateTime   @default(now())
 
-  provinces   Province[]
+  provinces Province[]
 }
 
 model Province {
-  id                 String   @id @default(uuid())
-  name               String   @unique
-  capital            String
+  id                  String  @id @default(uuid())
+  name                String  @unique
+  capital             String
   culturalDescription String  // Intro paragraph about the province
-  landmark           String   // Famous landmark
-  landmarkFact       String   // Interesting cultural fact
-  food               String   // Famous local dish
-  foodDescription    String   // Description of the dish
-  custom             String   // Local custom or tradition
-  mapCoordinates     String   // JSON: {x, y} for map positioning
-  unlockOrder        Int      @unique
-  color              String   @default("#ef4444") // Province theme color
-  imageUrl           String?  // Unsplash image for lesson card
-  storyContent       String?  // JSON array of story scenes for interactive mode
-  courseId           String?
+  landmark            String  // Famous landmark
+  landmarkFact        String  // Interesting cultural fact
+  food                String  // Famous local dish
+  foodDescription     String  // Description of the dish
+  custom              String  // Local custom or tradition
+  mapCoordinates      String  // JSON: {x, y} for map positioning
+  unlockOrder         Int     @unique
+  color               String  @default("#ef4444") // Province theme color
+  imageUrl            String? // Unsplash image for lesson card
+  storyContent        String? // JSON array of story scenes for interactive mode
+  courseId            String?
 
   course     Course?          @relation(fields: [courseId], references: [id])
-  vocabulary  VocabularyWord[]
-  grammar     GrammarPoint[]
-  exercises   Exercise[]
-  progress    UserProgress[]
+  vocabulary VocabularyWord[]
+  grammar    GrammarPoint[]
+  exercises  Exercise[]
+  progress   UserProgress[]
+
+  @@index([courseId, unlockOrder])
 }
 
 model VocabularyWord {
-  id         String  @id @default(uuid())
-  character  String
-  pinyin     String
-  english    String
-  category   String
-  provinceId String
+  id             String  @id @default(uuid())
+  character      String
+  pinyin         String
+  english        String
+  category       String
+  provinceId     String
   travelSentence String? // A sentence using this word in travel context
 
-  province   Province         @relation(fields: [provinceId], references: [id])
-  progress   UserWordProgress[]
-  savedBy    SavedWord[]
+  province     Province            @relation(fields: [provinceId], references: [id])
+  progress     UserWordProgress[]
+  savedBy      SavedWord[]
+  exercises    Exercise[]          @relation("ExerciseWord")
+  sessionItems ReviewSessionItem[]
+
+  @@index([provinceId])
 }
 
 model GrammarPoint {
-  id          String  @id @default(uuid())
+  id          String @id @default(uuid())
   title       String
   explanation String
-  examples    String  // JSON array of {chinese, pinyin, english} objects
-  provinceId   String
+  examples    String // JSON array of {chinese, pinyin, english} objects
+  provinceId  String
 
   province Province @relation(fields: [provinceId], references: [id])
 }
 
 model Exercise {
-  id            String @id @default(uuid())
-  type          String // MULTIPLE_CHOICE, FILL_BLANK, CULTURAL
+  id            String       @id @default(uuid())
+  type          ExerciseType
   question      String
   questionLabel String?
   options       String // JSON array
   correctAnswer String
-  provinceId     String
+  provinceId    String
+  /// Optional link to a vocabulary word so a graded exercise also schedules the word.
+  wordId        String?
 
-  province Province @relation(fields: [provinceId], references: [id])
+  province Province          @relation(fields: [provinceId], references: [id])
+  word     VocabularyWord?    @relation("ExerciseWord", fields: [wordId], references: [id])
+
+  @@index([provinceId])
+  @@index([wordId])
 }
 
 model UserProgress {
-  id             String   @id @default(uuid())
-  userId         String
-  provinceId      String
-  completed      Boolean  @default(false)
-  score          Int      @default(0)
-  exercisesDone  Int      @default(0)
-  lastStudiedAt  DateTime @default(now())
+  id            String   @id @default(uuid())
+  userId        String
+  provinceId    String
+  completed     Boolean  @default(false)
+  score         Int      @default(0)
+  exercisesDone Int      @default(0)
+  lastStudiedAt DateTime @default(now())
 
   user     User     @relation(fields: [userId], references: [id])
   province Province @relation(fields: [provinceId], references: [id])
 
   @@unique([userId, provinceId])
+  @@index([userId])
 }
 
 model SavedWord {
@@ -116,20 +179,76 @@ model SavedWord {
   word VocabularyWord @relation(fields: [wordId], references: [id])
 
   @@unique([userId, wordId])
+  @@index([userId])
 }
 
 model UserWordProgress {
-  id             String   @id @default(uuid())
+  id             String     @id @default(uuid())
   userId         String
   wordId         String
-  masteryLevel   Int      @default(0)
-  timesCorrect   Int      @default(0)
-  timesWrong     Int      @default(0)
-  lastReviewedAt DateTime @default(now())
-  nextReviewAt   DateTime @default(now())
+  /// FSRS state.
+  state          CardState  @default(NEW)
+  /// FSRS stability (memory strength). Higher = longer interval.
+  stability      Float      @default(0)
+  /// FSRS difficulty (0..10). Higher = harder.
+  difficulty     Float      @default(0)
+  /// Number of successful repetitions since last lapse.
+  reps           Int        @default(0)
+  /// How many times the card has lapsed (forgotten after graduation).
+  lapses         Int        @default(0)
+  /// Derived mastery (0..5) for display parity with the old schema.
+  /// Computed from state + reps + stability by the SRS service on write.
+  masteryLevel   Int        @default(0)
+  timesCorrect   Int        @default(0)
+  timesWrong     Int        @default(0)
+  lastReviewedAt DateTime?
+  nextReviewAt   DateTime   @default(now())
 
   user User           @relation(fields: [userId], references: [id])
   word VocabularyWord @relation(fields: [wordId], references: [id])
 
   @@unique([userId, wordId])
+  @@index([userId, nextReviewAt])
+  @@index([userId, state])
+}
+
+model ReviewSession {
+  id            String      @id @default(uuid())
+  userId        String
+  mode          ReviewMode
+  startedAt     DateTime    @default(now())
+  endedAt       DateTime?
+  itemsReviewed Int          @default(0)
+  correctCount  Int          @default(0)
+  /// Optional province scope (for LESSON_PRE/LESSON_POST sessions).
+  provinceId    String?
+
+  user  User                @relation(fields: [userId], references: [id])
+  items ReviewSessionItem[]
+
+  @@index([userId, startedAt])
+}
+
+model ReviewSessionItem {
+  id        String       @id @default(uuid())
+  sessionId String
+  wordId    String
+  rating    ReviewRating
+  correct   Boolean
+  createdAt DateTime     @default(now())
+
+  session ReviewSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  word    VocabularyWord @relation(fields: [wordId], references: [id])
+
+  @@index([sessionId])
+}
+
+model UserStreak {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  lastReviewDate DateTime?
+
+  user User @relation(fields: [userId], references: [id])
 }

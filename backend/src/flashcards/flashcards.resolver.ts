@@ -1,12 +1,12 @@
-import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
-import { ObjectType, Field } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ID, Context, ObjectType, Field, InputType } from '@nestjs/graphql';
+import { UseGuards, Injectable } from '@nestjs/common';
+import { IsString, MinLength } from 'class-validator';
 import { FlashcardsService } from './flashcards.service';
 import { SupabaseAuthGuard } from '../auth/supabase-auth.guard';
 import { VocabularyWord } from '../vocabulary/dto/vocabulary-word.dto';
 
 @ObjectType()
-class SavedWordResult {
+export class SavedWordResult {
   @Field(() => ID)
   id: string;
 
@@ -15,6 +15,14 @@ class SavedWordResult {
 
   @Field()
   createdAt: Date;
+}
+
+@InputType()
+export class WordIdInput {
+  @Field(() => ID)
+  @IsString()
+  @MinLength(1)
+  wordId: string;
 }
 
 @Resolver()
@@ -35,14 +43,14 @@ export class FlashcardsResolver {
 
   @Mutation(() => SavedWordResult)
   @UseGuards(SupabaseAuthGuard)
-  async saveWord(@Context() ctx: any, @Args('wordId', { type: () => ID }) wordId: string) {
-    return this.flashcardsService.saveWord(ctx.req.user.id, wordId);
+  async saveWord(@Context() ctx: any, @Args('input') input: WordIdInput) {
+    return this.flashcardsService.saveWord(ctx.req.user.id, input.wordId);
   }
 
   @Mutation(() => Boolean)
   @UseGuards(SupabaseAuthGuard)
-  async unsaveWord(@Context() ctx: any, @Args('wordId', { type: () => ID }) wordId: string) {
-    await this.flashcardsService.unsaveWord(ctx.req.user.id, wordId);
+  async unsaveWord(@Context() ctx: any, @Args('input') input: WordIdInput) {
+    await this.flashcardsService.unsaveWord(ctx.req.user.id, input.wordId);
     return true;
   }
 }

@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, CourseLevel } from '@prisma/client';
+import { createPrismaClient } from './seed-client';
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 async function main() {
   // Clean existing data
@@ -10,6 +11,26 @@ async function main() {
   await prisma.grammarPoint.deleteMany();
   await prisma.vocabularyWord.deleteMany();
   await prisma.province.deleteMany();
+  await prisma.course.deleteMany();
+
+  // Courses
+  const hsk1 = await prisma.course.create({
+    data: {
+      id: '4a96dd0c-cc60-4238-b255-5f8015ffb149',
+      name: 'HSK 1',
+      description: 'Beginner Chinese. 150 essential words, 9 lessons across China with Lily.',
+      level: CourseLevel.HSK1,
+    },
+  });
+  await prisma.course.create({
+    data: {
+      id: 'f26f74ef-0e28-4f73-bdc4-740cd064821a',
+      name: 'HSK 2',
+      description: 'Elementary Chinese. Coming soon — 300 words, expanded grammar.',
+      level: CourseLevel.HSK2,
+    },
+  });
+  const HSK1_COURSE_ID = hsk1.id;
 
   // ============================================================
   // STOP 1: BEIJING (北京) - The Capital
@@ -632,6 +653,12 @@ async function main() {
   for (const w of hkVocab) {
     await prisma.vocabularyWord.create({ data: { ...w, provinceId: hongkong.id } });
   }
+
+  // Link all 9 provinces to the HSK1 course
+  await prisma.province.updateMany({
+    where: { courseId: null },
+    data: { courseId: HSK1_COURSE_ID },
+  });
 
   console.log('🗺️  Seed complete! 8 provinces + Hong Kong bonus created.');
 }

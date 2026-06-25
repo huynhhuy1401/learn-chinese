@@ -1,8 +1,7 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { gql, useQuery, useMutation } from '@apollo/client';
-import { useState, useMemo, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,63 +10,63 @@ import { PronounceButton } from '@/components/pronounce-button';
 import { SaveWordButton } from '@/components/save-word-button';
 import { VocabBatch } from '@/components/lesson-vocab-batch';
 import { LessonGrammarCard } from '@/components/lesson-grammar-card';
-import { LessonPractice } from '@/components/lesson-practice';
+import { PracticeRunner } from '@/components/practice/PracticeRunner';
 import { StoryPlayer } from '@/components/story-player';
 import {
   Loader2, ChevronRight, ChevronLeft, BookOpen, Languages, PenTool,
   Trophy, Sparkles, CheckCircle2, ArrowRight, Library, ScrollText,
-  Building2, ChefHat, Compass,
+  Building2, ChefHat, Compass, Lock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
-
-const LESSON_QUERY = gql`
-  query Province($id: ID!) {
-    province(id: $id) {
-      id name capital unlockOrder color imageUrl storyContent
-      culturalDescription landmark landmarkFact food foodDescription custom
-      vocabulary { id character pinyin english category travelSentence }
-      grammar { id title explanation examples }
-      exercises { id type question questionLabel options correctAnswer }
-    }
-    provinces { id name unlockOrder color capital }
-  }
-`;
-
-const USER_PROGRESS_QUERY = gql`
-  query UserProgress {
-    userProgress { provinceId completed score exercisesDone }
-    wordProgress { wordId masteryLevel }
-  }
-`;
-
-const SUBMIT_ANSWER = gql`
-  mutation SubmitAnswer($exerciseId: String!, $answer: String!, $provinceId: ID!) {
-    submitAnswer(exerciseId: $exerciseId, answer: $answer, provinceId: $provinceId) { correct correctAnswer }
-  }
-`;
-
-const COMPLETE_PROVINCE = gql`
-  mutation CompleteProvince($provinceId: ID!) {
-    completeProvince(provinceId: $provinceId) { id completed }
-  }
-`;
-
-const REVIEW_WORD = gql`
-  mutation ReviewWord($wordId: ID!, $correct: Boolean!) {
-    reviewWord(wordId: $wordId, correct: $correct) { id masteryLevel }
-  }
-`;
+import { useAuth } from '@/components/auth/auth-provider';
+import {
+  useProvince,
+  useProvinces,
+  useUserProgress,
+  useSubmitAnswer,
+  useCompleteProvince,
+  useRecordReview,
+  useStartReviewSession,
+} from '@/hooks/use-graphql';
+import type { ExerciseItem } from '@/types/domain';
 
 export default function LessonDetailPage() {
   // ====== ALL HOOKS AT TOP ======
   const { id } = useParams<{ id: string }>();
-  const router = useRouter();
-  const { data, loading } = useQuery(LESSON_QUERY, { variables: { id } });
-  const { data: progressData } = useQuery(USER_PROGRESS_QUERY);
-  const [submitAnswer] = useMutation(SUBMIT_ANSWER);
-  const [completeProvince] = useMutation(COMPLETE_PROVINCE);
-  const [reviewWord] = useMutation(REVIEW_WORD);
+  const { session } = useAuth();
+  const { data, loading } = useProvince(id);
+  const { data: provincesData } = useProvinces();
+  const { data: progressData } = useUserProgress();
+  const [submitAnswer] = useSubmitAnswer();
+  const [completeProvince] = useCompleteProvince();
+  const [recordReview] = useRecordReview();
+  const [startReviewSession] = useStartReviewSession();
+  const [sessionState, setSessionState] = useState<{ id: string } | null>(null);
+  const ensureSessionRef = useRef<Promise<string> | null>(null);
+
+  // Lazily start (or reuse) a single daily session for SRS records in this lesson.
+  const ensureSession = useCallback(async (): Promise<string> => {
+    if (sessionState?.id) return sessionState.id;
+    if (!ensureSessionRef.current) {
+      ensureSessionRef.current = (async () => {
+        const { data: d } = await startReviewSession({ mode: 'DAILY', limit: 30 });
+        const sid = d?.startReviewSession?.id ?? '';
+        if (sid) setSessionState({ id: sid });
+        return sid;
+      })();
+    }
+    return ensureSessionRef.current;
+  }, [sessionState?.id, startReviewSession]);
+
+  const reviewWordLegacy = useCallback(
+    async (wordId: string, correct: boolean) => {
+      const sessionId = await ensureSession();
+      if (!sessionId) return;
+      await recordReview({ sessionId, wordId, rating: correct ? 'GOOD' : 'AGAIN' }).catch(() => {});
+    },
+    [ensureSession, recordReview],
+  );
 
   // Load saved progress from backend
   const savedProgress = progressData?.userProgress?.find((p: any) => p.provinceId === id);
@@ -75,15 +74,15 @@ export default function LessonDetailPage() {
   const studiedWordIds = new Set(wordProgressList.map((wp: any) => wp.wordId));
 
   const [view, setView] = useState<string>('story');
-  const [vocabDone, setVocabDone] = useState(savedProgress?.exercisesDone > 0 || false);
+  const [vocabDone, setVocabDone] = useState((savedProgress?.exercisesDone ?? 0) > 0 || false);
   const [grammarDone, setGrammarDone] = useState(false);
-  const [practiceDone, setPracticeDone] = useState(savedProgress?.completed || false);
-  const [practiceScore, setPracticeScore] = useState(savedProgress?.score || 0);
-  const [practiceTotal, setPracticeTotal] = useState(savedProgress?.exercisesDone || 0);
+  const [practiceDone, setPracticeDone] = useState((savedProgress?.completed ?? false));
+  const [practiceScore, setPracticeScore] = useState((savedProgress?.score ?? 0));
+  const [practiceTotal, setPracticeTotal] = useState((savedProgress?.exercisesDone ?? 0));
 
   // Derived data
   const lesson = data?.province ?? null;
-  const allProvinces = data?.provinces ?? [];
+  const allProvinces = provincesData?.provinces ?? [];
   const vocabBatches = useMemo(() => {
     if (!lesson?.vocabulary) return [];
     const batchSize = 5;
@@ -99,10 +98,20 @@ export default function LessonDetailPage() {
   const currentIdx = sortedProvinces.findIndex((p: any) => p.id === id);
   const nextProvince = currentIdx >= 0 && currentIdx < sortedProvinces.length - 1 ? sortedProvinces[currentIdx + 1] : null;
   const exercises = lesson?.exercises ?? [];
+  const progress = progressData?.userProgress ?? [];
+  const completedIds = useMemo(() => new Set(progress.filter((p: any) => p.completed).map((p: any) => p.provinceId)), [progress]);
+
+  const isLocked = useMemo(() => {
+    if (!lesson || !allProvinces.length) return false;
+    if (lesson.unlockOrder === 1) return false;
+    const earlierProvinces = allProvinces.filter((p: any) => p.unlockOrder < lesson.unlockOrder);
+    return earlierProvinces.some((p: any) => !completedIds.has(p.id));
+  }, [lesson, allProvinces, completedIds]);
+
   const allDone = vocabDone && grammarDone && practiceDone;
 
   const handleCompleteLesson = useCallback(async () => {
-    try { await completeProvince({ variables: { provinceId: id } }); } catch {}
+    try { await completeProvince(id); } catch {}
     setView('done');
     toast.success('Lesson completed!');
   }, [completeProvince, id]);
@@ -110,6 +119,40 @@ export default function LessonDetailPage() {
   // ====== RENDER: loading / not found ======
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>;
   if (!lesson) return <div className="max-w-2xl mx-auto px-4 py-20 text-center"><p className="text-muted-foreground">Lesson not found.</p></div>;
+
+  if (isLocked) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-20 text-center space-y-6 flex flex-col items-center justify-center min-h-[70vh]">
+        <div className="w-20 h-20 rounded-full bg-red-500/10 text-primary flex items-center justify-center shadow-inner animate-pulse">
+          <Lock className="w-10 h-10 text-red-600" />
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight">Lesson Locked</h1>
+        <p className="text-muted-foreground leading-relaxed">
+          You need to complete the previous provinces in your journey before unlocking <span className="font-semibold text-foreground">{lesson.name}</span>.
+          Master their vocabulary, practice exercises, and unlock the map step-by-step!
+        </p>
+        {!session && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-500/5 p-3.5 rounded-2xl border border-amber-500/10">
+            <strong>Note:</strong> Guest users can only access the first province (Beijing). Please sign in or register to track your progress and unlock all provinces!
+          </p>
+        )}
+        <div className="flex gap-3 justify-center w-full max-w-xs flex-col sm:flex-row pt-2">
+          <Link href="/lessons" className="w-full">
+            <Button size="lg" variant="outline" className="rounded-2xl w-full">
+              Back to Lessons Map
+            </Button>
+          </Link>
+          {!session && (
+            <Link href="/login" className="w-full">
+              <Button size="lg" className="rounded-2xl w-full">
+                Sign In
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // ====== SIDEBAR NAV ITEMS ======
   const navItems = [
@@ -428,7 +471,7 @@ export default function LessonDetailPage() {
             batchIndex={0}
             totalBatches={1}
             onReviewWord={(wordId, correct) => {
-              reviewWord({ variables: { wordId, correct } }).catch(() => {});
+              reviewWordLegacy(wordId, correct).catch(() => {});
             }}
             onComplete={() => { setVocabDone(true); setView('hub'); }}
           />
@@ -456,18 +499,29 @@ export default function LessonDetailPage() {
       {/* ======== PRACTICE (from hub or story) ======== */}
       {view === 'practice' && (
         <div className="space-y-4">
-          <LessonPractice
+          <PracticeRunner
             key={`practice-${lesson.id}`}
-            exercises={exercises}
-            onSubmitAnswer={async (exerciseId, answer) => {
-              const { data: result } = await submitAnswer({ variables: { exerciseId, answer, provinceId: id } });
-              return result!.submitAnswer;
+            cards={[]}
+            sessionId={sessionState?.id ?? ''}
+            onRecordReview={async (vars) => {
+              const sid = sessionState?.id ?? (await ensureSession());
+              const { data: d } = await recordReview({ sessionId: sid, wordId: vars.wordId, rating: vars.rating });
+              return { data: d as any };
             }}
-            onComplete={(score, total) => {
-              setPracticeScore(score);
-              setPracticeTotal(total);
+            exercises={exercises as unknown as ExerciseItem[]}
+            onSubmitExercise={async (exerciseId, answer) => {
+              const { data } = await submitAnswer({ exerciseId, answer: String(answer), provinceId: id });
+              const r = data?.submitAnswer;
+              if (r) return { correct: r.correct, correctAnswer: r.correctAnswer, partialCredit: r.partialCredit };
+              return { correct: false, correctAnswer: '', partialCredit: 0 };
+            }}
+            mode="LESSON_POST"
+            onComplete={(summary) => {
+              setPracticeScore(summary.correct);
+              setPracticeTotal(summary.total);
               setPracticeDone(true);
               setView('hub');
+              toast.success(`Practice done — ${summary.correct}/${summary.total} correct`);
             }}
           />
         </div>

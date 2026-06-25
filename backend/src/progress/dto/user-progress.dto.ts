@@ -1,4 +1,10 @@
-import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Int, registerEnumType } from '@nestjs/graphql';
+import { CardState } from '@prisma/client';
+
+registerEnumType(CardState, {
+  name: 'CardState',
+  description: 'FSRS card lifecycle state.',
+});
 
 @ObjectType()
 export class UserProgress {
@@ -35,6 +41,9 @@ export class UserWordProgress {
   @Field()
   wordId: string;
 
+  @Field(() => CardState)
+  state: CardState;
+
   @Field(() => Int)
   masteryLevel: number;
 
@@ -44,8 +53,14 @@ export class UserWordProgress {
   @Field(() => Int)
   timesWrong: number;
 
-  @Field()
-  lastReviewedAt: Date;
+  @Field(() => Int)
+  reps: number;
+
+  @Field(() => Int)
+  lapses: number;
+
+  @Field({ nullable: true })
+  lastReviewedAt?: Date;
 
   @Field()
   nextReviewAt: Date;

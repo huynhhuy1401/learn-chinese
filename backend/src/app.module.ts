@@ -14,6 +14,7 @@ import { ExercisesModule } from './exercises/exercises.module';
 import { ProgressModule } from './progress/progress.module';
 import { FlashcardsModule } from './flashcards/flashcards.module';
 import { CoursesModule } from './courses/courses.module';
+import { SrsModule } from './srs/srs.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CoursesModule } from './courses/courses.module';
     ExercisesModule,
     ProgressModule,
     FlashcardsModule,
+    SrsModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,0 +1,251 @@
+"""FSRS card lifecycle state."""
+enum CardState {
+  GRADUATED
+  LEARNING
+  NEW
+  RELEARNING
+  REVIEW
+}
+
+type Course {
+  description: String!
+  id: ID!
+  imageUrl: String
+  lessonCount: Int
+  level: String!
+  name: String!
+  provinces: [Province!]
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type DueCard {
+  category: String!
+  character: String!
+  english: String!
+  masteryLevel: Int!
+  pinyin: String!
+  state: String!
+  travelSentence: String
+  wordId: ID!
+}
+
+type Exercise {
+  correctAnswer: String!
+  id: ID!
+  options: String!
+  question: String!
+  questionLabel: String
+  type: ExerciseType!
+}
+
+type ExerciseResult {
+  correct: Boolean!
+  correctAnswer: String!
+  exerciseId: ID!
+  exercisesDone: Float!
+  partialCredit: Float!
+  score: Float!
+}
+
+"""Type of exercise item."""
+enum ExerciseType {
+  CULTURAL
+  FILL_BLANK
+  LISTENING
+  MATCHING
+  MULTIPLE_CHOICE
+  RECALL_MEANING
+  RECALL_READING
+  TONE
+  WRITING
+}
+
+type GrammarPoint {
+  examples: String!
+  explanation: String!
+  id: ID!
+  title: String!
+}
+
+type Mutation {
+  completeProvince(input: ProvinceIdInput!): UserProgress!
+  recordReview(input: RecordReviewInput!): ReviewResult!
+  reviewWord(input: ReviewWordInput!): UserWordProgress!
+  saveWord(input: WordIdInput!): SavedWordResult!
+  startReviewSession(input: StartReviewSessionInput!): ReviewSessionRef!
+  submitAnswer(input: SubmitAnswerInput!): ExerciseResult!
+  unsaveWord(input: WordIdInput!): Boolean!
+}
+
+type Province {
+  capital: String!
+  color: String!
+  culturalDescription: String!
+  custom: String!
+  exercises: [Exercise!]
+  food: String!
+  foodDescription: String!
+  grammar: [GrammarPoint!]
+  id: ID!
+  imageUrl: String
+  landmark: String!
+  landmarkFact: String!
+  mapCoordinates: String!
+  name: String!
+  storyContent: String
+  unlockOrder: Int!
+  vocabulary: [VocabularyWord!]
+}
+
+input ProvinceIdInput {
+  provinceId: ID!
+}
+
+type Query {
+  course(id: ID!): Course
+  courses: [Course!]!
+  currentUser: User!
+  dueCards(limit: Int! = 20, mode: ReviewMode! = DAILY, provinceId: ID): [DueCard!]!
+  exercises(provinceId: ID!): [Exercise!]!
+  grammar(provinceId: ID): [GrammarPoint!]!
+  isProvinceUnlocked(provinceId: ID!): Boolean!
+  isWordSaved(wordId: ID!): Boolean!
+  me: User!
+  nextProvince: Province
+  province(id: ID!): Province
+  provinces: [Province!]!
+  reviewStats: ReviewStats!
+  savedWords: [SavedWordResult!]!
+  userProgress: [UserProgress!]!
+  vocabulary(provinceId: ID): [VocabularyWord!]!
+  word(id: ID!): VocabularyWord
+  wordProgress: [UserWordProgress!]!
+}
+
+input RecordReviewInput {
+  rating: ReviewRating!
+  sessionId: ID!
+  wordId: ID!
+}
+
+"""Type of review session."""
+enum ReviewMode {
+  DAILY
+  LESSON_POST
+  LESSON_PRE
+  SAVED_ONLY
+}
+
+"""FSRS review rating: AGAIN/Lapse, HARD, GOOD, EASY."""
+enum ReviewRating {
+  AGAIN
+  EASY
+  GOOD
+  HARD
+}
+
+type ReviewResult {
+  masteryLevel: Int!
+  nextReviewAt: DateTime!
+  sessionCorrect: Int!
+  sessionReviewed: Int!
+  state: String!
+  wordId: ID!
+}
+
+type ReviewSessionRef {
+  cards: [DueCard!]!
+  id: ID!
+  mode: ReviewMode!
+  totalCards: Int!
+}
+
+type ReviewStats {
+  cardsDue: Int!
+  longestStreak: Int!
+  newCardsToday: Int!
+  retentionPct: Int!
+  reviewedToday: Int!
+  streak: Int!
+}
+
+input ReviewWordInput {
+  correct: Boolean!
+  wordId: ID!
+}
+
+type SavedWordResult {
+  createdAt: DateTime!
+  id: ID!
+  word: VocabularyWord!
+}
+
+input StartReviewSessionInput {
+  limit: Int = 20
+  mode: ReviewMode!
+  provinceId: ID
+}
+
+input SubmitAnswerInput {
+  answer: String!
+  exerciseId: String!
+  provinceId: ID!
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  name: String!
+}
+
+type UserProgress {
+  completed: Boolean!
+  exercisesDone: Int!
+  id: ID!
+  lastStudiedAt: DateTime!
+  provinceId: String!
+  score: Int!
+  userId: String!
+}
+
+type UserWordProgress {
+  id: ID!
+  lapses: Int!
+  lastReviewedAt: DateTime
+  masteryLevel: Int!
+  nextReviewAt: DateTime!
+  reps: Int!
+  state: CardState!
+  timesCorrect: Int!
+  timesWrong: Int!
+  userId: String!
+  wordId: String!
+}
+
+type VocabularyWord {
+  category: String!
+  character: String!
+  english: String!
+  id: ID!
+  isDue: Boolean
+  isSaved: Boolean
+  masteryLevel: Float
+  pinyin: String!
+  province: WordProvince
+  srsState: CardState
+  travelSentence: String
+}
+
+input WordIdInput {
+  wordId: ID!
+}
+
+type WordProvince {
+  color: String!
+  name: String!
+}

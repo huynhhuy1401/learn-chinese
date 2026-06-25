@@ -8,11 +8,17 @@ import { User } from './dto/user.dto';
 export class UsersResolver {
   constructor(private usersService: UsersService) {}
 
+  /// Existing alias — kept for back-compat.
   @Query(() => User)
   @UseGuards(SupabaseAuthGuard)
   async me(@Context() ctx: any) {
-    const supabaseUser = ctx.req.user;
-    // Upsert: ensure our DB has a matching user row
-    return this.usersService.upsertFromSupabase(supabaseUser);
+    return this.usersService.upsertFromSupabase(ctx.req.user);
+  }
+
+  /// Canonical current-user query for the frontend `useUser()` hook.
+  @Query(() => User)
+  @UseGuards(SupabaseAuthGuard)
+  async currentUser(@Context() ctx: any) {
+    return this.usersService.upsertFromSupabase(ctx.req.user);
   }
 }

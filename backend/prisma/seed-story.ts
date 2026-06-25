@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { createPrismaClient } from './seed-client';
+const prisma = createPrismaClient();
 
 const story = [
   {
