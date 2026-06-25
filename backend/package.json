@@ -12,7 +12,7 @@
     "prisma:seed:exercises": "ts-node prisma/seed-exercises.ts",
     "prisma:seed:stories": "ts-node prisma/seed-all-stories.ts",
     "prisma:seed:all": "npm run prisma:seed && npm run prisma:seed:exercises && npm run prisma:seed:stories",
-    "build": "nest build",
+    "build": "prisma generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
